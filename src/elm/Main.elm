@@ -3,6 +3,7 @@ port module Main exposing (..)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Views.Page exposing (frame)
 
 
 type User
@@ -49,10 +50,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 []
-            [ text "ping-pong league" ]
-        ]
+    frame
 
 
 subscriptions : Model -> Sub Msg
