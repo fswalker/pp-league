@@ -59,6 +59,7 @@ var commonConfig = {
 if (isDev === true) {
     module.exports = merge(commonConfig, {
         entry: [
+            'babel-polyfill',
             'webpack-dev-server/client?http://localhost:8080',
             entryPath
         ],
@@ -91,7 +92,10 @@ if (isDev === true) {
 // additional webpack settings for prod env (when invoked via 'npm run build')
 if (isProd === true) {
     module.exports = merge(commonConfig, {
-        entry: entryPath,
+        entry: [
+            'babel-polyfill', 
+            entryPath
+        ],
         module: {
             rules: [{
                 test: /\.elm$/,

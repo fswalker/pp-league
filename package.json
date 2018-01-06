@@ -37,6 +37,8 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "pouchdb-authentication": "^1.1.0",
     "pouchdb-browser": "^6.4.1"
   }
 }
