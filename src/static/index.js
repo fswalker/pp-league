@@ -1,3 +1,4 @@
+import './styles/fontawesome/font-awesome.scss';
 import 'bulma/bulma.sass';
 import './styles/main.sass';
 import * as Elm from '../elm/Main';

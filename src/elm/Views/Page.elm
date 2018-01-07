@@ -4,6 +4,8 @@ import Char
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Views.Assets as Assets exposing (src)
+import Views.Loader as Loader
+import Pages.Login as Login
 
 
 frame : Html msg
@@ -13,7 +15,8 @@ frame =
             [ ppHeader
             , navigation
             , div [ class "page-content" ]
-                [ p [] [ text "TODO" ]
+                -- [ Loader.loader
+                [ Login.view
                 ]
             , ppFooter
             ]
@@ -61,10 +64,7 @@ navigation =
         , attribute "aria-label" "main navigation"
         ]
         [ div [ class "navbar-brand" ]
-            [ -- [ a [ class "navbar-item", href "#" ]
-              --     [ img [ Assets.src Assets.pp_menu ] []
-              --     ]
-              div [ class "button navbar-burger burger", attribute "data-target" "pp-navbar-menu" ]
+            [ div [ class "button navbar-burger burger", attribute "data-target" "pp-navbar-menu" ]
                 [ span [] []
                 , span [] []
                 , span [] []
@@ -80,16 +80,22 @@ navigation =
 
 ppFooter : Html msg
 ppFooter =
-    footer [ class "footer is-paddingless" ]
-        [ div [ class "container" ]
-            [ div [ class "content" ]
-                [ p []
+    let
+        copyright =
+            String.fromChar <| Char.fromCode 169
+    in
+        footer [ class "footer" ]
+            [ div [ class "columns" ]
+                [ p [ class "column" ]
                     [ strong [] [ text "Ping-pong League " ]
                     , text "web app. "
-                    , text "The source code is licensed "
+                    ]
+                , p [ class "column has-text-centered" ]
+                    [ text "The source code is licensed "
                     , span [] [ text "MIT. " ]
-                    , text ((String.fromChar <| Char.fromCode 169) ++ " Michał Grygierzec 2018.")
+                    ]
+                , p [ class "column has-text-right" ]
+                    [ text (copyright ++ " Michał Grygierzec 2018.")
                     ]
                 ]
             ]
-        ]
