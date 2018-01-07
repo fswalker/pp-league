@@ -1,3 +1,4 @@
+import 'bulma/bulma.sass';
 import './styles/main.sass';
 import * as Elm from '../elm/Main';
 import { Storage } from './js/storage'

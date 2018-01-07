@@ -1,8 +1,6 @@
 port module Main exposing (..)
 
-import Html exposing (Html, div, h1, text)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html exposing (..)
 import Views.Page exposing (frame)
 
 
