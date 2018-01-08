@@ -1,32 +1,90 @@
-module Pages.Login exposing (view)
+module Pages.Login
+    exposing
+        ( Msg
+        , Model
+        , init
+        , update
+        , view
+        )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onInput, onClick)
 
 
-view : Html msg
-view =
+type alias Model =
+    { login : String
+    , password : String
+    }
+
+
+type Msg
+    = InputLogin String
+    | InputPassword String
+    | Login Model
+
+
+init : Model
+init =
+    { login = ""
+    , password = ""
+    }
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        InputLogin login ->
+            ( { model | login = login }, Cmd.none )
+
+        InputPassword pwd ->
+            ( { model | password = pwd }, Cmd.none )
+
+        Login _ ->
+            ( init, Cmd.none )
+
+
+view : Model -> Html Msg
+view model =
     div [ class "hero" ]
         [ div [ class "hero-body" ]
             [ div [ class "columns" ]
                 [ div [ class "column is-one-third is-offset-one-third" ]
-                    [ div [ class "field" ]
+                    [ h2 [ class "is-size-3 has-text-centered" ] [ text "Login" ]
+                    , div [ class "field" ]
                         [ p [ class "control has-icons-left" ]
-                            [ input [ class "input", type_ "email", placeholder "Email" ] []
+                            [ input
+                                [ class "input"
+                                , type_ "email"
+                                , placeholder "Email"
+                                , value model.login
+                                , onInput InputLogin
+                                ]
+                                []
                             , span [ class "icon is-small is-left" ]
                                 [ i [ class "fa fa-envelope" ] [] ]
                             ]
                         ]
                     , div [ class "field" ]
                         [ p [ class "control has-icons-left" ]
-                            [ input [ class "input", type_ "password", placeholder "Password" ] []
+                            [ input
+                                [ class "input"
+                                , type_ "password"
+                                , placeholder "Password"
+                                , value model.password
+                                , onInput InputPassword
+                                ]
+                                []
                             , span [ class "icon is-small is-left" ]
                                 [ i [ class "fa fa-lock" ] [] ]
                             ]
                         ]
                     , div [ class "field is-grouped is-grouped-right" ]
                         [ p [ class "control" ]
-                            [ button [ class "button is-success" ]
+                            [ button
+                                [ class "button is-success"
+                                , onClick (Login model)
+                                ]
                                 [ text "Login"
                                 ]
                             ]

@@ -5,19 +5,16 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Views.Assets as Assets exposing (src)
 import Views.Loader as Loader
-import Pages.Login as Login
 
 
-frame : Html msg
-frame =
+frame : Html msg -> Html msg
+frame content =
     section [ class "page-frame" ]
         [ div [ class "container" ]
             [ ppHeader
             , navigation
             , div [ class "page-content" ]
-                -- [ Loader.loader
-                [ Login.view
-                ]
+                [ content ]
             , ppFooter
             ]
         ]
