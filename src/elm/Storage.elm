@@ -3,6 +3,7 @@ port module Storage
         ( getSession
         , updateSession
         , logIn
+        , logOut
         )
 
 import Json.Decode exposing (Value)
@@ -15,3 +16,6 @@ port updateSession : (Value -> msg) -> Sub msg
 
 
 port logIn : { login : String, password : String } -> Cmd msg
+
+
+port logOut : () -> Cmd msg

@@ -3,16 +3,17 @@ module Views.Page exposing (frame)
 import Char
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Views.Assets as Assets exposing (src)
 import Views.Loader as Loader
 import Data.User as User exposing (User)
 
 
-frame : User -> Html msg -> Html msg
-frame user content =
+frame : User -> msg -> Html msg -> Html msg
+frame user logoutMsg content =
     section [ class "page-frame" ]
         [ div [ class "container" ]
-            [ ppHeader user
+            [ ppHeader user logoutMsg
             , navigation
             , div [ class "page-content" ]
                 [ content ]
@@ -21,8 +22,8 @@ frame user content =
         ]
 
 
-ppHeader : User -> Html msg
-ppHeader user =
+ppHeader : User -> msg -> Html msg
+ppHeader user logoutMsg =
     header [ class "header" ]
         [ div [ class "container" ]
             [ div [ class "level" ]
@@ -42,36 +43,37 @@ ppHeader user =
                             ]
                         ]
                     ]
-                , userGreeting user
+                , userGreeting user logoutMsg
                 ]
             ]
         ]
 
 
-userGreeting : User -> Html msg
-userGreeting user =
+userGreeting : User -> msg -> Html msg
+userGreeting user logoutMsg =
     case user of
         User.Anonymous ->
             text ""
 
         User.Player { name } ->
-            displayHelloMsg name
+            displayHelloMsg name logoutMsg
 
         User.Admin { name } ->
-            displayHelloMsg name
+            displayHelloMsg name logoutMsg
 
         User.ServerAdmin { name } ->
-            displayHelloMsg name
+            displayHelloMsg name logoutMsg
 
 
-displayHelloMsg : String -> Html msg
-displayHelloMsg uname =
+displayHelloMsg : String -> msg -> Html msg
+displayHelloMsg uname logoutMsg =
     div [ class "level-right greeting" ]
         [ h3 [ class "subtitle" ]
             [ text "Hello, "
             , strong [] [ text uname ]
             , text "!"
             ]
+        , button [ class "button is-rounded", onClick logoutMsg ] [ text "Log Out" ]
         ]
 
 

@@ -27,6 +27,13 @@ export class Storage {
             .catch(failureFn);
     }
 
+    logOut(successFn, failureFn) {
+        console.log('logout', this);
+        return this.remote.logOut()
+            .then(successFn)
+            .catch(failureFn);
+    }
+
     getUser(user, successFn, failureFn) {
         console.log('getUser', this, user, successFn, failureFn);
         return this.remote.getUser(user)

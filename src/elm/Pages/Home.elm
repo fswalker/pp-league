@@ -5,4 +5,4 @@ import Html exposing (..)
 
 view : Html msg
 view =
-    text "Home"
+    text "Home - TODO: display your league scores table with your row highlighted"

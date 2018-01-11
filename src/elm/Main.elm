@@ -46,13 +46,14 @@ init =
 
 type Msg
     = LoginMsg Login.Msg
+    | LogoutMsg
     | SessionMsg User
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
-        ( SessionMsg user, Loading ) ->
+        ( SessionMsg user, _ ) ->
             -- TODO routing - go to login page
             -- TODO refactor to function
             let
@@ -75,6 +76,13 @@ update msg model =
             in
                 { model | page = Login newModel }
                     ! [ Cmd.map LoginMsg loginCmd ]
+
+        ( LogoutMsg, _ ) ->
+            { model
+                | page = Login Login.init
+                , user = Anonymous
+            }
+                ! [ Storage.logOut () ]
 
         ( s, m ) ->
             let
@@ -101,7 +109,7 @@ viewPage user page =
     -- TODO use session info to properly render all parts of the app
     let
         frame =
-            Page.frame user
+            Page.frame user LogoutMsg
     in
         case page of
             Loading ->

@@ -22,9 +22,9 @@ export class WebappPorts {
     }
 
     initLogIn() {
-        const okHandler = (response) => {
-            console.log('logIn', response, this);
-            // this.app.ports.updateSession.send(session);
+        const okHandler = (session) => {
+            console.log('logIn', session, this);
+            this.app.ports.updateSession.send(session);
         };
         const errHandler = (err) => {
             console.error('logIn error', err);
@@ -35,9 +35,24 @@ export class WebappPorts {
         });
     }
 
+    initLogOut() {
+        const okHandler = (response) => {
+            console.log('logOut', response, this);
+            // this.app.ports.updateSession.send(session);
+        };
+        const errHandler = (err) => {
+            console.error('logOut error', err);
+            // TODO call port - abort?? retry?
+        };
+        this.app.ports.logOut.subscribe(() => {
+            this.storage.logOut(okHandler, errHandler);
+        });
+    }
+
     init() {
         this.initGetSession();        
         this.initLogIn();        
+        this.initLogOut();
     }
 
 }
