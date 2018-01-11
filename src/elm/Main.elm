@@ -1,10 +1,12 @@
 port module Main exposing (..)
 
 import Html exposing (..)
+import Json.Decode as Decode
 import Views.Page exposing (frame)
+import Views.Loader as Loader
 import Pages.Login as Login
-import Data.User exposing (User, Role(..))
-import Data.Session exposing (Session)
+import Data.User exposing (User(..), userDecoder)
+import Storage
 
 
 type Page
@@ -17,7 +19,7 @@ type Page
 
 
 type alias Model =
-    { session : Session
+    { user : User
     , page : Page
 
     -- TODO page
@@ -28,12 +30,14 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { session = { user = { role = Anonymous } }
-            , page = Login Login.init
+            { user = Anonymous
+
+            -- , page = Login Login.init
+            , page = Loading
             }
     in
         -- TODO command to fetch session info and based on that load login page or fetch user data
-        ( model, Cmd.none )
+        ( model, Storage.getSession () )
 
 
 
@@ -42,11 +46,17 @@ init =
 
 type Msg
     = LoginMsg Login.Msg
+    | SessionMsg User
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
+        ( SessionMsg user, Loading ) ->
+            -- TODO routing - go to login page
+            { model | page = Login Login.init }
+                ! [ Cmd.none ]
+
         ( LoginMsg loginMsg, Login loginModel ) ->
             let
                 ( newModel, loginCmd ) =
@@ -55,8 +65,15 @@ update msg model =
                 { model | page = Login newModel }
                     ! [ Cmd.map LoginMsg loginCmd ]
 
-        ( _, _ ) ->
-            model ! [ Cmd.none ]
+        ( s, m ) ->
+            let
+                _ =
+                    Debug.log "msg" s
+
+                _ =
+                    Debug.log "model" m
+            in
+                model ! [ Cmd.none ]
 
 
 
@@ -64,16 +81,16 @@ update msg model =
 
 
 view : Model -> Html Msg
-view { session, page } =
-    viewPage session page
+view { user, page } =
+    viewPage user page
 
 
-viewPage : Session -> Page -> Html Msg
-viewPage session page =
+viewPage : User -> Page -> Html Msg
+viewPage user page =
     -- TODO use session info to properly render all parts of the app
     case page of
         Loading ->
-            text ""
+            Loader.loader
                 |> frame
 
         Login loginModel ->
@@ -84,7 +101,12 @@ viewPage session page =
 
 subscriptions : Model -> Sub Msg
 subscriptions =
-    \_ -> Sub.none
+    let
+        decodeUser =
+            Decode.decodeValue userDecoder
+                >> (Result.withDefault Anonymous)
+    in
+        \_ -> Storage.updateSession (decodeUser >> SessionMsg)
 
 
 main : Program Never Model Msg

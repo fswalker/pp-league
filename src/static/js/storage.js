@@ -7,12 +7,10 @@ pouchDB.plugin(pouchDbPlugin);
 export class Storage {
 
     constructor() {
-        console.log('Initialize Storage...');
         const remoteOptions = { skip_setup: true };
         this.remote = new pouchDB(Constants.dbUrl, remoteOptions);
         this.local = new pouchDB(Constants.dbName);
         this.local.sync(this.remote, { live: true, retry: true }).on('error', console.error.bind(console));
-        console.log('Initialize Storage... DONE', this);
     }
 
     getSession(successFn, failureFn) {
