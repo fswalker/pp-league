@@ -2,16 +2,21 @@ port module Main exposing (..)
 
 import Html exposing (..)
 import Json.Decode as Decode
-import Views.Page exposing (frame)
+import Views.Page as Page
 import Views.Loader as Loader
 import Pages.Login as Login
+import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
 import Storage
+
+
+-- TODO refactor loadig - move to the model or use union type
 
 
 type Page
     = Loading
     | Login Login.Model
+    | Home
 
 
 
@@ -21,8 +26,6 @@ type Page
 type alias Model =
     { user : User
     , page : Page
-
-    -- TODO page
     }
 
 
@@ -31,12 +34,9 @@ init =
     let
         model =
             { user = Anonymous
-
-            -- , page = Login Login.init
             , page = Loading
             }
     in
-        -- TODO command to fetch session info and based on that load login page or fetch user data
         ( model, Storage.getSession () )
 
 
@@ -54,8 +54,19 @@ update msg model =
     case ( msg, model.page ) of
         ( SessionMsg user, Loading ) ->
             -- TODO routing - go to login page
-            { model | page = Login Login.init }
-                ! [ Cmd.none ]
+            -- TODO refactor to function
+            let
+                page =
+                    if user == Anonymous then
+                        Login Login.init
+                    else
+                        Home
+            in
+                { model
+                    | page = page
+                    , user = user
+                }
+                    ! [ Cmd.none ]
 
         ( LoginMsg loginMsg, Login loginModel ) ->
             let
@@ -88,15 +99,23 @@ view { user, page } =
 viewPage : User -> Page -> Html Msg
 viewPage user page =
     -- TODO use session info to properly render all parts of the app
-    case page of
-        Loading ->
-            Loader.loader
-                |> frame
+    let
+        frame =
+            Page.frame user
+    in
+        case page of
+            Loading ->
+                Loader.loader
+                    |> frame
 
-        Login loginModel ->
-            Login.view loginModel
-                |> Html.map LoginMsg
-                |> frame
+            Login loginModel ->
+                Login.view loginModel
+                    |> Html.map LoginMsg
+                    |> frame
+
+            Home ->
+                Home.view
+                    |> frame
 
 
 subscriptions : Model -> Sub Msg

@@ -5,13 +5,14 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Views.Assets as Assets exposing (src)
 import Views.Loader as Loader
+import Data.User as User exposing (User)
 
 
-frame : Html msg -> Html msg
-frame content =
+frame : User -> Html msg -> Html msg
+frame user content =
     section [ class "page-frame" ]
         [ div [ class "container" ]
-            [ ppHeader
+            [ ppHeader user
             , navigation
             , div [ class "page-content" ]
                 [ content ]
@@ -20,8 +21,8 @@ frame content =
         ]
 
 
-ppHeader : Html msg
-ppHeader =
+ppHeader : User -> Html msg
+ppHeader user =
     header [ class "header" ]
         [ div [ class "container" ]
             [ div [ class "level" ]
@@ -41,14 +42,35 @@ ppHeader =
                             ]
                         ]
                     ]
-                , div [ class "level-right greeting" ]
-                    [ h3 [ class "subtitle" ]
-                        [ text "Hello, "
-                        , strong [] [ text "Guest" ]
-                        , text "!"
-                        ]
-                    ]
+                , userGreeting user
                 ]
+            ]
+        ]
+
+
+userGreeting : User -> Html msg
+userGreeting user =
+    case user of
+        User.Anonymous ->
+            text ""
+
+        User.Player { name } ->
+            displayHelloMsg name
+
+        User.Admin { name } ->
+            displayHelloMsg name
+
+        User.ServerAdmin { name } ->
+            displayHelloMsg name
+
+
+displayHelloMsg : String -> Html msg
+displayHelloMsg uname =
+    div [ class "level-right greeting" ]
+        [ h3 [ class "subtitle" ]
+            [ text "Hello, "
+            , strong [] [ text uname ]
+            , text "!"
             ]
         ]
 
