@@ -10,6 +10,7 @@ module Pages.Login
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
+import Storage
 
 
 type alias Model =
@@ -41,7 +42,7 @@ update msg model =
             ( { model | password = pwd }, Cmd.none )
 
         Login _ ->
-            ( init, Cmd.none )
+            ( init, Storage.logIn model )
 
 
 view : Model -> Html Msg

@@ -17,13 +17,13 @@ type User
 
 metadataDecoder : Decoder UserMetadata
 metadataDecoder =
-    Decode.at [ "userCtx", "name" ] (Decode.nullable Decode.string)
+    Decode.field "name" (Decode.nullable Decode.string)
         |> Decode.map ((Maybe.withDefault "") >> UserMetadata)
 
 
 rolesDecoder : Decoder (List String)
 rolesDecoder =
-    Decode.at [ "userCtx", "roles" ] (Decode.list Decode.string)
+    Decode.field "roles" (Decode.list Decode.string)
 
 
 userDecoder : Decoder User
