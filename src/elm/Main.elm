@@ -2,6 +2,9 @@ port module Main exposing (..)
 
 import Html exposing (..)
 import Json.Decode as Decode
+import Navigation exposing (Location)
+import UrlParser as Url
+import Route exposing (Route)
 import Views.Page as Page
 import Views.Loader as Loader
 import Pages.Login as Login
@@ -13,7 +16,9 @@ import Storage
 -- TODO refactor loadig - move to the model or use union type
 
 
-type Page
+type
+    Page
+    -- Rename Loading to Blank
     = Loading
     | Login Login.Model
     | Home
@@ -29,15 +34,17 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    let
-        model =
-            { user = Anonymous
-            , page = Loading
-            }
-    in
-        ( model, Storage.getSession () )
+initialModel : Model
+initialModel =
+    { user = Anonymous
+    , page = Loading
+    }
+
+
+init : Location -> ( Model, Cmd Msg )
+init location =
+    -- TODO handle different initial locations based on session data, model, and url location
+    ( initialModel, Storage.getSession () )
 
 
 
@@ -45,14 +52,38 @@ init =
 
 
 type Msg
-    = LoginMsg Login.Msg
+    = SetRoute (Maybe Route)
+    | LoginMsg Login.Msg
     | LogoutMsg
     | SessionMsg User
+
+
+setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
+setRoute route model =
+    case route of
+        Nothing ->
+            -- TODO not found page here?
+            { model | page = Loading } ! [ Cmd.none ]
+
+        Just Route.Home ->
+            -- TODO
+            { model | page = Home } ! [ Cmd.none ]
+
+        Just Route.Login ->
+            -- TODO
+            { model | page = Login (Login.init) } ! [ Cmd.none ]
+
+        Just Route.Logout ->
+            -- TODO
+            { model | page = Login (Login.init) } ! [ Cmd.none ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
+        ( SetRoute maybeRoute, _ ) ->
+            setRoute maybeRoute model
+
         ( SessionMsg user, _ ) ->
             -- TODO routing - go to login page
             -- TODO refactor to function
@@ -138,7 +169,7 @@ subscriptions =
 
 main : Program Never Model Msg
 main =
-    Html.program
+    Navigation.program (Route.fromLocation >> SetRoute)
         { init = init
         , view = view
         , update = update
