@@ -3,27 +3,30 @@ module Views.Page exposing (frame)
 import Char
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Views.Assets as Assets exposing (src)
 import Views.Loader as Loader
 import Data.User as User exposing (User)
 
 
-frame : User -> msg -> Html msg -> Html msg
-frame user logoutMsg content =
+frame : User -> Bool -> Html msg -> Html msg
+frame user isLoading content =
     section [ class "page-frame" ]
         [ div [ class "container" ]
-            [ ppHeader user logoutMsg
+            [ ppHeader user
             , navigation
             , div [ class "page-content" ]
-                [ content ]
+                [ if isLoading then
+                    Loader.loader
+                  else
+                    content
+                ]
             , ppFooter
             ]
         ]
 
 
-ppHeader : User -> msg -> Html msg
-ppHeader user logoutMsg =
+ppHeader : User -> Html msg
+ppHeader user =
     header [ class "header" ]
         [ div [ class "container" ]
             [ div [ class "level" ]
@@ -43,37 +46,37 @@ ppHeader user logoutMsg =
                             ]
                         ]
                     ]
-                , userGreeting user logoutMsg
+                , userGreeting user
                 ]
             ]
         ]
 
 
-userGreeting : User -> msg -> Html msg
-userGreeting user logoutMsg =
+userGreeting : User -> Html msg
+userGreeting user =
     case user of
         User.Anonymous ->
             text ""
 
         User.Player { name } ->
-            displayHelloMsg name logoutMsg
+            displayHelloMsg name
 
         User.Admin { name } ->
-            displayHelloMsg name logoutMsg
+            displayHelloMsg name
 
         User.ServerAdmin { name } ->
-            displayHelloMsg name logoutMsg
+            displayHelloMsg name
 
 
-displayHelloMsg : String -> msg -> Html msg
-displayHelloMsg uname logoutMsg =
+displayHelloMsg : String -> Html msg
+displayHelloMsg uname =
     div [ class "level-right greeting" ]
         [ h3 [ class "subtitle" ]
             [ text "Hello, "
             , strong [] [ text uname ]
             , text "!"
             ]
-        , button [ class "button is-rounded", onClick logoutMsg ] [ text "Log Out" ]
+        , a [ class "button is-rounded", href "#" ] [ text "Log Out" ]
         ]
 
 

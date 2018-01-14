@@ -19,7 +19,7 @@ import Storage
 type
     Page
     -- Rename Loading to Blank
-    = Loading
+    = Blank
     | Login Login.Model
     | Home
 
@@ -31,13 +31,15 @@ type
 type alias Model =
     { user : User
     , page : Page
+    , isLoading : Bool
     }
 
 
 initialModel : Model
 initialModel =
     { user = Anonymous
-    , page = Loading
+    , page = Blank
+    , isLoading = True
     }
 
 
@@ -60,22 +62,29 @@ type Msg
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
 setRoute route model =
-    case route of
-        Nothing ->
-            -- TODO not found page here?
-            { model | page = Loading } ! [ Cmd.none ]
+    let
+        _ =
+            Debug.log "setRoute" route
+    in
+        case route of
+            Nothing ->
+                -- TODO not found page here?
+                { model | page = Blank, isLoading = True } ! [ Cmd.none ]
 
-        Just Route.Home ->
-            -- TODO
-            { model | page = Home } ! [ Cmd.none ]
+            Just Route.Home ->
+                -- TODO
+                { model | page = Home } ! [ Cmd.none ]
 
-        Just Route.Login ->
-            -- TODO
-            { model | page = Login (Login.init) } ! [ Cmd.none ]
+            Just Route.Login ->
+                { model
+                    | page = Login (Login.init)
+                    , isLoading = False
+                }
+                    ! [ Cmd.none ]
 
-        Just Route.Logout ->
-            -- TODO
-            { model | page = Login (Login.init) } ! [ Cmd.none ]
+            Just Route.Logout ->
+                -- TODO
+                { model | page = Login (Login.init) } ! [ Cmd.none ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -86,19 +95,7 @@ update msg model =
 
         ( SessionMsg user, _ ) ->
             -- TODO routing - go to login page
-            -- TODO refactor to function
-            let
-                page =
-                    if user == Anonymous then
-                        Login Login.init
-                    else
-                        Home
-            in
-                { model
-                    | page = page
-                    , user = user
-                }
-                    ! [ Cmd.none ]
+            handleSessionChange user model
 
         ( LoginMsg loginMsg, Login loginModel ) ->
             let
@@ -126,25 +123,43 @@ update msg model =
                 model ! [ Cmd.none ]
 
 
+handleSessionChange : User -> Model -> ( Model, Cmd Msg )
+handleSessionChange user ({ page, isLoading } as model) =
+    let
+        command =
+            if user == Anonymous then
+                -- Login Login.init
+                Route.newUrl Route.Login
+            else
+                -- TODO change url to home
+                Route.newUrl Route.Home
+    in
+        { model
+            | user = user
+            , isLoading = True
+        }
+            ! [ command ]
+
+
 
 -- VIEW
 
 
 view : Model -> Html Msg
-view { user, page } =
-    viewPage user page
+view { user, page, isLoading } =
+    viewPage user page isLoading
 
 
-viewPage : User -> Page -> Html Msg
-viewPage user page =
+viewPage : User -> Page -> Bool -> Html Msg
+viewPage user page isLoading =
     -- TODO use session info to properly render all parts of the app
     let
         frame =
-            Page.frame user LogoutMsg
+            Page.frame user isLoading
     in
         case page of
-            Loading ->
-                Loader.loader
+            Blank ->
+                text ""
                     |> frame
 
             Login loginModel ->
