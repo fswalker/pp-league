@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Views.Assets as Assets exposing (src)
 import Views.Loader as Loader
 import Data.User as User exposing (User)
+import Route
 
 
 frame : User -> Bool -> Html msg -> Html msg
@@ -31,7 +32,7 @@ ppHeader user =
         [ div [ class "container" ]
             [ div [ class "level" ]
                 [ div [ class "level-left" ]
-                    [ a [ href "#", title "Link - Home Page" ]
+                    [ a [ Route.href Route.Home, title "Link - Home Page" ]
                         [ div [ class "level" ]
                             [ div [ class "level-left" ]
                                 [ img
@@ -76,7 +77,7 @@ displayHelloMsg uname =
             , strong [] [ text uname ]
             , text "!"
             ]
-        , a [ class "button is-rounded", href "#" ] [ text "Log Out" ]
+        , a [ class "button is-rounded", Route.href Route.Logout ] [ text "Log Out" ]
         ]
 
 
@@ -96,6 +97,7 @@ navigation =
             ]
         , div [ class "navbar-menu", id "pp-navbar-menu" ]
             [ div [ class "navbar-start is-size-5" ]
+                -- TODO proper nav with proper hrefs
                 [ a [ class "navbar-item", href "#", title "Link - Home Page" ] [ text "Home" ]
                 ]
             ]

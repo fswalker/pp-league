@@ -38,7 +38,7 @@ export class WebappPorts {
     initLogOut() {
         const okHandler = (response) => {
             console.log('logOut', response, this);
-            // this.app.ports.updateSession.send(session);
+            this.app.ports.updateSession.send(null);
         };
         const errHandler = (err) => {
             console.error('logOut error', err);

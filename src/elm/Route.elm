@@ -1,9 +1,15 @@
-module Route exposing (Route(..), fromLocation, newUrl)
+module Route
+    exposing
+        ( Route(..)
+        , fromLocation
+        , newUrl
+        , href
+        )
 
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Navigation exposing (Location)
-import UrlParser as Url exposing (Parser, oneOf, map, top, s, parsePath)
+import UrlParser as Url exposing (Parser, oneOf, map, top, s, parseHash)
 
 
 type Route
@@ -23,23 +29,24 @@ route =
 
 routeToStr : Route -> String
 routeToStr route =
-    case route of
-        Home ->
-            "home"
+    "#/"
+        ++ case route of
+            Home ->
+                ""
 
-        Login ->
-            "login"
+            Login ->
+                "login"
 
-        Logout ->
-            "logout"
+            Logout ->
+                "logout"
 
 
 fromLocation : Location -> Maybe Route
 fromLocation location =
-    if String.isEmpty location.pathname then
+    if String.isEmpty location.hash then
         Just Home
     else
-        parsePath route location
+        parseHash route location
 
 
 newUrl : Route -> Cmd msg
