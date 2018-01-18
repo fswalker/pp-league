@@ -9,13 +9,19 @@ port module Storage
 import Json.Decode exposing (Value)
 
 
+port logIn : { login : String, password : String } -> Cmd msg
+
+
+port logOut : () -> Cmd msg
+
+
 port getSession : () -> Cmd msg
 
 
 port updateSession : (Value -> msg) -> Sub msg
 
 
-port logIn : { login : String, password : String } -> Cmd msg
+port getActiveRound : () -> Cmd msg
 
 
-port logOut : () -> Cmd msg
+port updateActiveRound : (Value -> msg) -> Sub msg

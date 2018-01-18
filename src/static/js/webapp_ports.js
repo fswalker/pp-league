@@ -14,7 +14,7 @@ export class WebappPorts {
         };
         const errHandler = (err) => {
             console.error('getSession error', err);
-            // TODO call port - abort?? retry?
+            // call port - abort?? retry?
         };
         this.app.ports.getSession.subscribe(() => {
             this.storage.getSession(okHandler, errHandler);
@@ -28,7 +28,7 @@ export class WebappPorts {
         };
         const errHandler = (err) => {
             console.error('logIn error', err);
-            // TODO call port - abort?? retry?
+            // call port - abort?? retry?
         };
         this.app.ports.logIn.subscribe((credentials) => {
             this.storage.logIn(credentials, okHandler, errHandler);
@@ -42,17 +42,33 @@ export class WebappPorts {
         };
         const errHandler = (err) => {
             console.error('logOut error', err);
-            // TODO call port - abort?? retry?
+            // call port - abort?? retry?
         };
         this.app.ports.logOut.subscribe(() => {
             this.storage.logOut(okHandler, errHandler);
         });
     }
 
+    initGetActiveRound() {
+        const okHandler = (response) => {
+            console.log('GetActiveRound', response, this);
+            // TODO
+            // this.app.ports.updateActiveRound.send(todo);
+        };
+        const errHandler = (err) => {
+            console.error('GetActiveRound error', err);
+            // call port - abort?? retry?
+        };
+        this.app.ports.getActiveRound.subscribe(() => {
+            this.storage.getActiveRound(okHandler, errHandler);
+        });
+    }
+
     init() {
-        this.initGetSession();        
         this.initLogIn();        
         this.initLogOut();
+        this.initGetSession();        
+        this.initGetActiveRound();        
     }
 
 }

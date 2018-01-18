@@ -40,6 +40,7 @@
     "babel-polyfill": "^6.26.0",
     "bulma": "^0.6.1",
     "pouchdb-authentication": "^1.1.0",
-    "pouchdb-browser": "^6.4.1"
+    "pouchdb-browser": "^6.4.1",
+    "pouchdb-find": "^6.4.1"
   }
 }
