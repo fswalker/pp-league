@@ -52,8 +52,7 @@ export class WebappPorts {
     initGetActiveRound() {
         const okHandler = (response) => {
             console.log('GetActiveRound', response, this);
-            // TODO
-            // this.app.ports.updateActiveRound.send(todo);
+            this.app.ports.updateActiveRound.send(response);
         };
         const errHandler = (err) => {
             console.error('GetActiveRound error', err);

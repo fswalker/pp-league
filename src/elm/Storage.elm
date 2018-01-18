@@ -1,9 +1,11 @@
 port module Storage
     exposing
-        ( getSession
-        , updateSession
-        , logIn
+        ( logIn
         , logOut
+        , getSession
+        , updateSession
+        , getActiveRound
+        , updateActiveRound
         )
 
 import Json.Decode exposing (Value)

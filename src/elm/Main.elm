@@ -3,20 +3,19 @@ port module Main exposing (..)
 import Html exposing (..)
 import Json.Decode as Decode
 import Navigation exposing (Location)
-import UrlParser as Url
 import Route exposing (Route)
 import Views.Page as Page
-import Views.Loader as Loader
 import Pages.Login as Login
 import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
+import Data.Round exposing (Round, roundDecoder)
 import Storage
 
 
 type Page
     = Blank
     | Login Login.Model
-    | Home
+    | Home Home.Model
 
 
 
@@ -52,6 +51,7 @@ type Msg
     = SetRoute (Maybe Route)
     | LoginMsg Login.Msg
     | SessionMsg User
+    | HomeMsg Home.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -71,10 +71,11 @@ setRoute route model =
 
             Just Route.Home ->
                 { model
-                    | page = Home
+                  -- TODO change it properly!!
+                    | page = Home Home.initialModel
                     , isLoading = False
                 }
-                    ! [ Cmd.none ]
+                    ! [ Storage.getActiveRound () ]
 
             Just Route.Login ->
                 if model.user /= Anonymous then
@@ -111,6 +112,15 @@ update msg model =
             in
                 { model | page = Login newModel }
                     ! [ Cmd.map LoginMsg loginCmd ]
+
+        -- TODO handle model and create handler function for that case!
+        ( HomeMsg homeMsg, Home homeModel ) ->
+            let
+                ( newModel, newCmd ) =
+                    Home.update homeMsg homeModel
+            in
+                { model | page = Home newModel }
+                    ! [ Cmd.map HomeMsg newCmd ]
 
         ( s, m ) ->
             let
@@ -159,13 +169,13 @@ viewPage user page isLoading =
                 text ""
                     |> frame
 
-            Login loginModel ->
-                Login.view loginModel
+            Login model ->
+                Login.view model
                     |> Html.map LoginMsg
                     |> frame
 
-            Home ->
-                Home.view
+            Home model ->
+                Home.view model
                     |> frame
 
 
@@ -175,8 +185,16 @@ subscriptions =
         decodeUser =
             Decode.decodeValue userDecoder
                 >> (Result.withDefault Anonymous)
+
+        decodeRound =
+            Decode.decodeValue roundDecoder
+                >> Result.toMaybe
     in
-        \_ -> Storage.updateSession (decodeUser >> SessionMsg)
+        \_ ->
+            Sub.batch
+                [ Storage.updateSession (decodeUser >> SessionMsg)
+                , Storage.updateActiveRound (decodeRound >> Home.UpdateActiveRound >> HomeMsg)
+                ]
 
 
 main : Program Never Model Msg
