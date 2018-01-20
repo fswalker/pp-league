@@ -32,7 +32,7 @@ ppHeader user =
         [ div [ class "container" ]
             [ div [ class "level" ]
                 [ div [ class "level-left" ]
-                    [ a [ Route.href Route.Home, title "Link - Home Page" ]
+                    [ a [ Route.href Route.Home, title "Link - My League Page" ]
                         [ div [ class "level" ]
                             [ div [ class "level-left" ]
                                 [ img
@@ -98,7 +98,7 @@ navigation =
         , div [ class "navbar-menu", id "pp-navbar-menu" ]
             [ div [ class "navbar-start is-size-5" ]
                 -- TODO proper nav with proper hrefs
-                [ a [ class "navbar-item", href "#", title "Link - Home Page" ] [ text "Home" ]
+                [ a [ class "navbar-item", href "#", title "Link - My League Page" ] [ text "My League" ]
                 ]
             ]
         ]
