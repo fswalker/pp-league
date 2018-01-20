@@ -59,14 +59,14 @@ userGreeting user =
         User.Anonymous ->
             text ""
 
-        User.Player { name } ->
-            displayHelloMsg name
+        User.Player { nick } ->
+            displayHelloMsg nick
 
-        User.Admin { name } ->
-            displayHelloMsg name
+        User.Admin { nick } ->
+            displayHelloMsg nick
 
-        User.ServerAdmin { name } ->
-            displayHelloMsg name
+        User.ServerAdmin { nick } ->
+            displayHelloMsg nick
 
 
 displayHelloMsg : String -> Html msg
@@ -75,7 +75,6 @@ displayHelloMsg uname =
         [ h3 [ class "subtitle" ]
             [ text "Hello, "
             , strong [] [ text uname ]
-            , text "!"
             ]
         , a [ class "button is-rounded", Route.href Route.Logout ] [ text "Log Out" ]
         ]

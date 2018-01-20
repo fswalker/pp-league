@@ -8,6 +8,7 @@ module Pages.Home
         )
 
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Data.Round exposing (Round)
 
 
@@ -31,7 +32,13 @@ view { activeRound } =
             text "Fetching active round or no round is active!"
 
         Just round ->
-            text round.name
+            div []
+                [ div [ class "level" ]
+                    [ h3 [ class "level-item is-size-3" ] [ text round.name ]
+                    ]
+                , div [ class "level" ]
+                    [ text "" ]
+                ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

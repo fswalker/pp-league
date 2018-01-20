@@ -10,7 +10,7 @@ export class WebappPorts {
     initGetSession() {
         const okHandler = (session) => {
             console.log('gotSession', session, this);
-            this.app.ports.updateSession.send(session && session.userCtx);
+            this.app.ports.updateSession.send(session);
         };
         const errHandler = (err) => {
             console.error('getSession error', err);

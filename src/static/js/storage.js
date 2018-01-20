@@ -42,6 +42,7 @@ export class Storage {
     logIn({ login, password }, successFn, failureFn) {
         console.log('login', this);
         return this.remote.logIn(login, password)
+            .then(this._getUserDetails.bind(this))
             .then(successFn)
             .catch(failureFn);
     }
@@ -56,17 +57,29 @@ export class Storage {
     getSession(successFn, failureFn) {
         console.log('getSession', this, successFn, failureFn);
         return this.remote.getSession()
+            .then(this._getUserCtx)
+            .then(this._getUserDetails.bind(this))
             .then(successFn)
             .catch(failureFn);
     }
 
-    // TODO is it required after extending user session?
-    getUser(user, successFn, failureFn) {
-        console.log('getUser', this, user, successFn, failureFn);
-        return this.remote.getUser(user)
-            // .then(successFn)
-            .then((r) => console.log('internal getUser', r))
-            .catch(failureFn);
+    _getUserDetails(user) {
+        console.log('_getUserDetails', this, user);
+        if (user && user.name) {
+            return this.local.find({
+                selector: {
+                    _id: user && user.name
+                }
+            })
+            .then(result => {
+                const details = this._getSingleDoc(result);
+                console.log('_getUserDetails result', details);
+                return this._mergeUser(user, details);
+            });
+        }
+        else {
+            return user;
+        }
     }
 
     // TODO
@@ -79,16 +92,34 @@ export class Storage {
     }
 
     getActiveRound(successFn, failureFn) {
+        const getSingleDoc = this._getSingleDoc.bind(this);
         return this.local.find({
             selector: {
                 type: 'round',
                 active: true
               }
         }).then(r => {
-            var data = r && r.docs && r.docs[0];
-            successFn(data);
+            successFn(getSingleDoc(r));
         })
           .catch(failureFn);
+    }
+
+    // session is an object returned from getSession method in PouchDB authentication plugin
+    _getUserCtx(session) {
+        return session && session.userCtx;
+    }
+
+    _getSingleDoc(result) {
+        return result && result.docs && result.docs[0];
+    }
+
+    _mergeUser(user, details) {
+        const userDetails = {};
+        userDetails.name = user && user.name;
+        userDetails.roles = (user && user.roles) || [];
+        userDetails.nick = details && details.nick;
+        userDetails.league_id = details && details.league_id;
+        return userDetails;
     }
 
     // TODO remove once testing is finished
