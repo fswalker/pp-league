@@ -27,3 +27,9 @@ port getActiveRound : () -> Cmd msg
 
 
 port updateActiveRound : (Value -> msg) -> Sub msg
+
+
+port getLeaguePlayers : () -> Cmd msg
+
+
+port updateLeaguePlayers : (Value -> msg) -> Sub msg

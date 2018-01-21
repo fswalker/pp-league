@@ -63,6 +63,20 @@ export class WebappPorts {
         });
     }
 
+    initGetLeaguePlayers() {
+        const okHandler = (response) => {
+            console.log('GetLeaguePlayers', response, this);
+            this.app.ports.updateLeaguePlayers.send(response);
+        };
+        const errHandler = (err) => {
+            console.error('GetLeaguePlayers error', err);
+            // call port - abort?? retry?
+        };
+        this.app.ports.getLeaguePlayers.subscribe(() => {
+            this.storage.getLeaguePlayers(okHandler, errHandler);
+        });
+    }
+
     init() {
         this.initLogIn();        
         this.initLogOut();

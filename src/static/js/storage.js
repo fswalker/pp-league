@@ -14,11 +14,12 @@ export class Storage {
         this.local = new pouchDB(Constants.dbName);
         this.local.sync(this.remote, { live: true, retry: true }).on('error', console.error.bind(console));
         this._createIndexes();
-        // this.test();
+        this.test();
     }
 
     _createIndexes() {
         this._createActiveRoundIndex();
+        this._createLeaguePlayersIndex();
     }
 
     _createActiveRoundIndex() {
@@ -28,6 +29,15 @@ export class Storage {
             ddoc: 'index_type_active'
         });
     }
+
+    _createLeaguePlayersIndex() {
+        return this._createIndex({
+            fields: [ 'type', 'league_id' ],
+            name: 'indexTypeLeague',
+            ddoc: 'index_type_league'
+        });
+    }
+
 
     _createIndex(index) {
         return this.local.createIndex({
@@ -82,12 +92,26 @@ export class Storage {
         }
     }
 
-    // TODO
     getUsers(successFn, failureFn) {
         console.log('getUsers', this, successFn, failureFn);
-        return this.remote.getUser(user)
-            // .then(successFn)
-            .then((r) => console.log('internal getUser', r))
+        return this.local.find({
+            selector: {
+                type: 'player'
+              }
+            })
+            .then(successFn)
+            .catch(failureFn);
+    }
+
+    getLeaguePlayers(league_id, successFn, failureFn) {
+        console.log('getLeaguePlayers', league_id, this, successFn, failureFn);
+        return this.local.find({
+            selector: {
+                type: 'player',
+                league_id: league_id
+              }
+            })
+            .then(successFn)
             .catch(failureFn);
     }
 
@@ -129,7 +153,10 @@ export class Storage {
         const okFn = (r) => console.log('ok', r);
         const errFn = (e) => console.log('error', e);
         // this.getSession(okFn, errFn);
-        this.getActiveRound(okFn, errFn);
+        // this.getActiveRound(okFn, errFn);
+        this.getUsers(okFn, errFn);
+        this.getLeaguePlayers('16a596e5b990d9e498f93fbc94007e2a', okFn, errFn);
+
     }
 
 }
