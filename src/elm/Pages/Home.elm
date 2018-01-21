@@ -10,6 +10,7 @@ module Pages.Home
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Data.Round exposing (Round)
+import Data.Player exposing (Player)
 
 
 type Msg
@@ -18,11 +19,15 @@ type Msg
 
 type alias Model =
     { activeRound : Maybe Round
+    , leaguePlayers : List (Player {})
     }
 
 
+initialModel : Model
 initialModel =
-    { activeRound = Nothing }
+    { activeRound = Nothing
+    , leaguePlayers = []
+    }
 
 
 view : Model -> Html msg

@@ -1,13 +1,11 @@
 module Data.User exposing (User(..), userDecoder)
 
+import Data.Player exposing (..)
 import Json.Decode as Decode exposing (Decoder)
 
 
 type alias UserMetadata =
-    { name : String
-    , nick : String
-    , league_id : String
-    }
+    Player { name : String }
 
 
 type User
@@ -17,17 +15,20 @@ type User
     | ServerAdmin UserMetadata
 
 
+buildUserMetadata : String -> String -> String -> UserMetadata
+buildUserMetadata name nick league_id =
+    { name = name
+    , nick = nick
+    , league_id = league_id
+    }
+
+
 metadataDecoder : Decoder UserMetadata
 metadataDecoder =
-    Decode.map3 UserMetadata
+    Decode.map3 buildUserMetadata
         (Decode.field "name" Decode.string)
         (Decode.field "nick" Decode.string)
         (Decode.field "league_id" Decode.string)
-
-
-
--- Decode.field "name" (Decode.nullable Decode.string)
--- |> Decode.map ((Maybe.withDefault "") >> UserMetadata)
 
 
 rolesDecoder : Decoder (List String)
