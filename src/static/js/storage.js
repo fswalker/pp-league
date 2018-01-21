@@ -19,6 +19,7 @@ export class Storage {
 
     _createIndexes() {
         this._createActiveRoundIndex();
+        this._createLeagueRoundIndex();
         this._createLeaguePlayersIndex();
     }
 
@@ -27,6 +28,14 @@ export class Storage {
             fields: [ 'type', 'active' ],
             name: 'indexTypeActive',
             ddoc: 'index_type_active'
+        });
+    }
+
+    _createLeagueRoundIndex() {
+        return this._createIndex({
+            fields: [ 'type', 'league_id', 'round_id' ],
+            name: 'indexTypeLeagueRound',
+            ddoc: 'index_type_league_round'
         });
     }
 
