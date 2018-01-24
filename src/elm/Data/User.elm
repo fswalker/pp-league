@@ -1,34 +1,39 @@
 module Data.User exposing (User(..), userDecoder)
 
-import Data.Player exposing (..)
 import Json.Decode as Decode exposing (Decoder)
+import Data.Entity exposing (Entity)
+import Data.Player exposing (Player)
 
 
-type alias UserMetadata =
-    Player { name : String }
+type alias UserMetadata a =
+    { a | name : String }
 
 
 type User
     = Anonymous
-    | Player UserMetadata
-    | Admin UserMetadata
-    | ServerAdmin UserMetadata
+    | Player (Player (Entity (UserMetadata {})))
+    | Admin (Player (Entity (UserMetadata {})))
+    | ServerAdmin (Player (Entity (UserMetadata {})))
 
 
-buildUserMetadata : String -> String -> String -> UserMetadata
-buildUserMetadata name nick league_id =
-    { name = name
+buildUser : Maybe String -> Maybe String -> String -> String -> String -> Player (Entity (UserMetadata {}))
+buildUser id_ rev_ nick league_id name =
+    { id_ = id_
+    , rev_ = rev_
     , nick = nick
     , league_id = league_id
+    , name = name
     }
 
 
-metadataDecoder : Decoder UserMetadata
+metadataDecoder : Decoder (Player (Entity (UserMetadata {})))
 metadataDecoder =
-    Decode.map3 buildUserMetadata
-        (Decode.field "name" Decode.string)
+    Decode.map5 buildUser
+        (Decode.maybe (Decode.field "_id" Decode.string))
+        (Decode.maybe (Decode.field "_rev" Decode.string))
         (Decode.field "nick" Decode.string)
         (Decode.field "league_id" Decode.string)
+        (Decode.field "name" Decode.string)
 
 
 rolesDecoder : Decoder (List String)

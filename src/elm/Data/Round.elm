@@ -1,11 +1,11 @@
 module Data.Round exposing (Round, roundDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
-import Data.DbObject exposing (..)
+import Data.Entity exposing (..)
 
 
 type alias Round =
-    DbObject
+    Entity
         { name : String
         }
 

@@ -1,4 +1,4 @@
-module Data.DbObject exposing (DbObject, Id, Rev)
+module Data.Entity exposing (Entity, Id, Rev)
 
 
 type alias Id =
@@ -9,7 +9,7 @@ type alias Rev =
     Maybe String
 
 
-type alias DbObject a =
+type alias Entity a =
     { a
         | id_ : Id
         , rev_ : Rev
