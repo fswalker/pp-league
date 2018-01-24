@@ -66,14 +66,14 @@ export class WebappPorts {
     initGetLeaguePlayers() {
         const okHandler = (response) => {
             console.log('GetLeaguePlayers', response, this);
-            this.app.ports.updateLeaguePlayers.send(response);
+            this.app.ports.updateLeaguePlayers.send(response && response.docs);
         };
         const errHandler = (err) => {
             console.error('GetLeaguePlayers error', err);
             // call port - abort?? retry?
         };
-        this.app.ports.getLeaguePlayers.subscribe(() => {
-            this.storage.getLeaguePlayers(okHandler, errHandler);
+        this.app.ports.getLeaguePlayers.subscribe((league_id) => {
+            this.storage.getLeaguePlayers(league_id, okHandler, errHandler);
         });
     }
 
@@ -81,7 +81,8 @@ export class WebappPorts {
         this.initLogIn();        
         this.initLogOut();
         this.initGetSession();        
-        this.initGetActiveRound();        
+        this.initGetActiveRound();
+        this.initGetLeaguePlayers();
     }
 
 }

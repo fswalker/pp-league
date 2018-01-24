@@ -14,7 +14,7 @@ export class Storage {
         this.local = new pouchDB(Constants.dbName);
         this.local.sync(this.remote, { live: true, retry: true }).on('error', console.error.bind(console));
         this._createIndexes();
-        this.test();
+        // this.test();
     }
 
     _createIndexes() {

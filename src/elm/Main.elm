@@ -70,12 +70,15 @@ setRoute route model =
                     ! [ Cmd.none ]
 
             Just Route.Home ->
-                { model
-                  -- TODO change it properly!!
-                    | page = Home Home.initialModel
-                    , isLoading = False
-                }
-                    ! [ Storage.getActiveRound () ]
+                let
+                    ( homeModel, homeCmds ) =
+                        Home.init model.user
+                in
+                    { model
+                        | page = Home homeModel
+                        , isLoading = True
+                    }
+                        ! [ homeCmds |> Cmd.map HomeMsg ]
 
             Just Route.Login ->
                 if model.user /= Anonymous then
@@ -116,10 +119,13 @@ update msg model =
         -- TODO handle model and create handler function for that case!
         ( HomeMsg homeMsg, Home homeModel ) ->
             let
-                ( newModel, newCmd ) =
-                    Home.update homeMsg homeModel
+                ( isLoading, newModel, newCmd ) =
+                    Home.update model.isLoading homeMsg homeModel
             in
-                { model | page = Home newModel }
+                { model
+                    | page = Home newModel
+                    , isLoading = isLoading
+                }
                     ! [ Cmd.map HomeMsg newCmd ]
 
         ( s, m ) ->
