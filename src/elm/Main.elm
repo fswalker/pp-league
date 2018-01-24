@@ -9,6 +9,7 @@ import Pages.Login as Login
 import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
 import Data.Round exposing (Round, roundDecoder)
+import Data.Player exposing (Player, playersListDecoder)
 import Storage
 
 
@@ -195,11 +196,16 @@ subscriptions =
         decodeRound =
             Decode.decodeValue roundDecoder
                 >> Result.toMaybe
+
+        decodePlayers =
+            Decode.decodeValue playersListDecoder
+                >> Result.toMaybe
     in
         \_ ->
             Sub.batch
                 [ Storage.updateSession (decodeUser >> SessionMsg)
                 , Storage.updateActiveRound (decodeRound >> Home.UpdateActiveRound >> HomeMsg)
+                , Storage.updateLeaguePlayers (decodePlayers >> Home.UpdatePlayers >> HomeMsg)
                 ]
 
 

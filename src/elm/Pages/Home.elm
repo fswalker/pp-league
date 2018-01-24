@@ -9,6 +9,7 @@ module Pages.Home
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Data.Entity exposing (Entity)
 import Data.Round exposing (Round)
 import Data.User exposing (User(..))
 import Data.Player exposing (Player)
@@ -17,11 +18,12 @@ import Storage exposing (..)
 
 type Msg
     = UpdateActiveRound (Maybe Round)
+    | UpdatePlayers (Maybe (List (Player (Entity {}))))
 
 
 type alias Model =
     { activeRound : Maybe Round
-    , leaguePlayers : Maybe (List (Player {}))
+    , leaguePlayers : Maybe (List (Player (Entity {})))
     }
 
 
@@ -55,6 +57,14 @@ update isLoading msg model =
             ( model.leaguePlayers == Nothing
             , { model
                 | activeRound = maybeRound
+              }
+            , Cmd.none
+            )
+
+        UpdatePlayers players ->
+            ( model.activeRound == Nothing
+            , { model
+                | leaguePlayers = players
               }
             , Cmd.none
             )

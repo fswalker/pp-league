@@ -1,4 +1,4 @@
-module Data.Player exposing (Player, playerDecoder)
+module Data.Player exposing (Player, playerDecoder, playersListDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
 import Data.Entity exposing (..)
@@ -27,3 +27,8 @@ playerDecoder =
         (Decode.field "_rev" (Decode.nullable Decode.string))
         (Decode.field "nick" Decode.string)
         (Decode.field "league_id" Decode.string)
+
+
+playersListDecoder : Decoder (List (Player (Entity {})))
+playersListDecoder =
+    Decode.list playerDecoder
