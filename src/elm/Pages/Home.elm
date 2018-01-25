@@ -9,6 +9,7 @@ module Pages.Home
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Dict exposing (Dict, fromList)
 import Data.Entity exposing (Entity)
 import Data.Round exposing (Round)
 import Data.User exposing (User(..))
@@ -23,14 +24,14 @@ type Msg
 
 type alias Model =
     { activeRound : Maybe Round
-    , leaguePlayers : Maybe (List (Player (Entity {})))
+    , leaguePlayersDict : Maybe (Dict String String)
     }
 
 
 initialModel : Model
 initialModel =
     { activeRound = Nothing
-    , leaguePlayers = Nothing
+    , leaguePlayersDict = Nothing
     }
 
 
@@ -54,17 +55,17 @@ update : Bool -> Msg -> Model -> ( Bool, Model, Cmd Msg )
 update isLoading msg model =
     case msg of
         UpdateActiveRound maybeRound ->
-            ( model.leaguePlayers == Nothing
+            ( model.leaguePlayersDict == Nothing
             , { model
                 | activeRound = maybeRound
               }
             , Cmd.none
             )
 
-        UpdatePlayers players ->
+        UpdatePlayers maybePlayers ->
             ( model.activeRound == Nothing
             , { model
-                | leaguePlayers = players
+                | leaguePlayersDict = createPlayersDict maybePlayers
               }
             , Cmd.none
             )
@@ -97,3 +98,11 @@ getLeagueId user =
 
         ServerAdmin { league_id } ->
             Just league_id
+
+
+createPlayersDict : Maybe (List (Player (Entity {}))) -> Maybe (Dict String String)
+createPlayersDict =
+    Maybe.map
+        (List.filterMap (\p -> p |> .id_ |> (Maybe.map (\id_ -> ( id_, p.nick ))))
+            >> Dict.fromList
+        )
