@@ -17,6 +17,9 @@ export class Storage {
         // this.test();
     }
 
+    // TODO make createIndex public and return promise
+    // Call rest of the index.js inside then??
+
     _createIndexes() {
         this._createActiveRoundIndex();
         this._createLeagueRoundIndex();
@@ -135,6 +138,19 @@ export class Storage {
             successFn(getSingleDoc(r));
         })
           .catch(failureFn);
+    }
+
+    getScores(league_id, round_id, successFn, failureFn) {
+        console.log('getScores', league_id, round_id, this, successFn, failureFn);
+        return this.local.find({
+            selector: {
+                type: 'score',
+                league_id: league_id,
+                round_id: round_id
+              }
+            })
+            .then(successFn)
+            .catch(failureFn);
     }
 
     // session is an object returned from getSession method in PouchDB authentication plugin

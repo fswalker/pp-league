@@ -10,21 +10,24 @@ module Pages.Home
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Dict exposing (Dict, fromList)
-import Data.Entity exposing (Entity)
+import Data.Entity exposing (Entity, Id)
 import Data.Round exposing (Round)
 import Data.User exposing (User(..))
 import Data.Player exposing (Player)
+import Data.Score exposing (Score)
 import Storage exposing (..)
 
 
 type Msg
     = UpdateActiveRound (Maybe Round)
     | UpdatePlayers (Maybe (List (Player (Entity {}))))
+    | UpdateScores (Maybe (List (Score {})))
 
 
 type alias Model =
     { activeRound : Maybe Round
     , leaguePlayersDict : Maybe (Dict String String)
+    , scores : Maybe (List (Score {}))
     }
 
 
@@ -32,6 +35,7 @@ initialModel : Model
 initialModel =
     { activeRound = Nothing
     , leaguePlayersDict = Nothing
+    , scores = Nothing
     }
 
 
@@ -51,24 +55,82 @@ view { activeRound } =
                 ]
 
 
-update : Bool -> Msg -> Model -> ( Bool, Model, Cmd Msg )
-update isLoading msg model =
+update : User -> Msg -> Model -> ( Bool, Model, Cmd Msg )
+update user msg model =
     case msg of
         UpdateActiveRound maybeRound ->
-            ( model.leaguePlayersDict == Nothing
-            , { model
-                | activeRound = maybeRound
-              }
-            , Cmd.none
-            )
+            let
+                newModel =
+                    { model
+                        | activeRound = maybeRound
+                    }
+            in
+                ( not <| isDataLoadingDone newModel
+                , newModel
+                , tryCreatingGetScoresCommand user maybeRound
+                )
 
         UpdatePlayers maybePlayers ->
-            ( model.activeRound == Nothing
-            , { model
-                | leaguePlayersDict = createPlayersDict maybePlayers
-              }
-            , Cmd.none
-            )
+            let
+                newModel =
+                    { model
+                        | leaguePlayersDict = createPlayersDict maybePlayers
+                    }
+            in
+                ( not <| isDataLoadingDone newModel
+                , newModel
+                , Cmd.none
+                )
+
+        UpdateScores maybeScores ->
+            let
+                -- TODO map scores list to properly aggregated and sorted list
+                newModel =
+                    { model
+                        | scores = maybeScores
+                    }
+            in
+                ( not <| isDataLoadingDone newModel
+                , newModel
+                , Cmd.none
+                )
+
+
+tryCreatingGetScoresCommand : User -> (Maybe { a | id_ : Id } -> Cmd Msg)
+tryCreatingGetScoresCommand user activeRound =
+    case ( getLeagueId user, activeRound ) of
+        ( Just lid, Just ar ) ->
+            ar
+                |> .id_
+                |> (Maybe.map (((,) lid) >> Storage.getScores))
+                |> Maybe.withDefault Cmd.none
+
+        _ ->
+            Cmd.none
+
+
+
+-- (\ar ->
+--     Storage.getScores ( league_id, ar.id_ ) |> Maybe.Just
+-- >> (Maybe.withDefault Cmd.none)
+-- canScoresBeLoaded : Model -> Bool
+-- canScoresBeLoaded model =
+--     model.leaguePlayersDict
+--         /= Nothing
+--         && model.activeRound
+--         /= Nothing
+--         && model.scores
+--         == Nothing
+
+
+isDataLoadingDone : Model -> Bool
+isDataLoadingDone model =
+    model.leaguePlayersDict
+        /= Nothing
+        && model.activeRound
+        /= Nothing
+        && model.scores
+        /= Nothing
 
 
 init : User -> ( Model, Cmd Msg )

@@ -77,12 +77,27 @@ export class WebappPorts {
         });
     }
 
+    initGetScores() {
+        const okHandler = (response) => {
+            console.log('GetScores', response, this);
+            this.app.ports.updateScores.send(response && response.docs);
+        };
+        const errHandler = (err) => {
+            console.error('GetScores error', err);
+            // call port - abort?? retry?
+        };
+        this.app.ports.getScores.subscribe(([league_id, round_id]) => {
+            this.storage.getScores(league_id, round_id, okHandler, errHandler);
+        });
+    }
+
     init() {
         this.initLogIn();        
         this.initLogOut();
         this.initGetSession();        
         this.initGetActiveRound();
         this.initGetLeaguePlayers();
+        this.initGetScores();
     }
 
 }

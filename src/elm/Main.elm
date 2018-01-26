@@ -10,6 +10,7 @@ import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
 import Data.Round exposing (Round, roundDecoder)
 import Data.Player exposing (Player, playersListDecoder)
+import Data.Score exposing (Score, scoresListDecoder)
 import Storage
 
 
@@ -121,7 +122,7 @@ update msg model =
         ( HomeMsg homeMsg, Home homeModel ) ->
             let
                 ( isLoading, newModel, newCmd ) =
-                    Home.update model.isLoading homeMsg homeModel
+                    Home.update model.user homeMsg homeModel
             in
                 { model
                     | page = Home newModel
@@ -200,12 +201,17 @@ subscriptions =
         decodePlayers =
             Decode.decodeValue playersListDecoder
                 >> Result.toMaybe
+
+        decodeScores =
+            Decode.decodeValue scoresListDecoder
+                >> Result.toMaybe
     in
         \_ ->
             Sub.batch
                 [ Storage.updateSession (decodeUser >> SessionMsg)
                 , Storage.updateActiveRound (decodeRound >> Home.UpdateActiveRound >> HomeMsg)
                 , Storage.updateLeaguePlayers (decodePlayers >> Home.UpdatePlayers >> HomeMsg)
+                , Storage.updateScores (decodeScores >> Home.UpdateScores >> HomeMsg)
                 ]
 
 

@@ -8,6 +8,8 @@ port module Storage
         , updateActiveRound
         , getLeaguePlayers
         , updateLeaguePlayers
+        , getScores
+        , updateScores
         )
 
 import Json.Decode exposing (Value)
@@ -35,3 +37,9 @@ port getLeaguePlayers : String -> Cmd msg
 
 
 port updateLeaguePlayers : (Value -> msg) -> Sub msg
+
+
+port getScores : ( String, String ) -> Cmd msg
+
+
+port updateScores : (Value -> msg) -> Sub msg
