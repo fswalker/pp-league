@@ -109,20 +109,6 @@ tryCreatingGetScoresCommand user activeRound =
             Cmd.none
 
 
-
--- (\ar ->
---     Storage.getScores ( league_id, ar.id_ ) |> Maybe.Just
--- >> (Maybe.withDefault Cmd.none)
--- canScoresBeLoaded : Model -> Bool
--- canScoresBeLoaded model =
---     model.leaguePlayersDict
---         /= Nothing
---         && model.activeRound
---         /= Nothing
---         && model.scores
---         == Nothing
-
-
 isDataLoadingDone : Model -> Bool
 isDataLoadingDone model =
     model.leaguePlayersDict
