@@ -23,7 +23,7 @@ buildScore p1 p2 s1 s2 =
 unitTests : Test
 unitTests =
     describe "PlayerStats module"
-        [ describe "calculateScoresTable "
+        [ describe "calculateScoresTable"
             [ test "Given empty input When run Then produce empty output" <|
                 \_ ->
                     calculateScoresTable [] []

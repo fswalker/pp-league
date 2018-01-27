@@ -15,6 +15,7 @@ import Data.Round exposing (Round)
 import Data.User exposing (User(..))
 import Data.Player exposing (Player)
 import Data.Score exposing (Score)
+import Data.PlayerStats as Stats exposing (PlayerStats)
 import Storage exposing (..)
 
 
@@ -27,7 +28,7 @@ type Msg
 type alias Model =
     { activeRound : Maybe Round
     , leaguePlayersDict : Maybe (Dict String String)
-    , scores : Maybe (List (Score {}))
+    , scores : Maybe (List PlayerStats)
     }
 
 
@@ -72,9 +73,19 @@ update user msg model =
 
         UpdatePlayers maybePlayers ->
             let
+                playersDict =
+                    createPlayersDict maybePlayers
+
+                usersIds =
+                    getUsersIds playersDict
+
+                stats =
+                    Maybe.withDefault [] model.scores
+
                 newModel =
                     { model
-                        | leaguePlayersDict = createPlayersDict maybePlayers
+                        | leaguePlayersDict = playersDict
+                        , scores = Just <| Stats.recalculateScoresTableForUsers usersIds stats
                     }
             in
                 ( not <| isDataLoadingDone newModel
@@ -84,16 +95,34 @@ update user msg model =
 
         UpdateScores maybeScores ->
             let
-                -- TODO map scores list to properly aggregated and sorted list
                 newModel =
                     { model
-                        | scores = maybeScores
+                        | scores = tryCalculatingScoresTable model.leaguePlayersDict maybeScores
                     }
             in
                 ( not <| isDataLoadingDone newModel
                 , newModel
                 , Cmd.none
                 )
+
+
+getUsersIds : Maybe (Dict String String) -> List String
+getUsersIds =
+    Maybe.withDefault Dict.empty
+        >> Dict.keys
+
+
+tryCalculatingScoresTable : Maybe (Dict String String) -> Maybe (List (Score {})) -> Maybe (List PlayerStats)
+tryCalculatingScoresTable mUsers mScores =
+    let
+        users =
+            getUsersIds mUsers
+
+        scores =
+            Maybe.withDefault [] mScores
+    in
+        Stats.calculateScoresTable users scores
+            |> Just
 
 
 tryCreatingGetScoresCommand : User -> (Maybe { a | id_ : Id } -> Cmd Msg)

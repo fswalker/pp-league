@@ -2,8 +2,7 @@ module Data.PlayerStats
     exposing
         ( PlayerStats
         , calculateScoresTable
-        , mergePlayerStats
-        , comparePlayerStats
+        , recalculateScoresTableForUsers
         )
 
 import Dict as Dict exposing (Dict)
@@ -21,13 +20,13 @@ type alias PlayerStats =
     }
 
 
-initPlayerStats : ( String, String ) -> PlayerStats
-initPlayerStats ( user_id, _ ) =
+initPlayerStats : String -> PlayerStats
+initPlayerStats user_id =
     PlayerStats user_id 0 0 0 0 0 0
 
 
-getPlayersStats : Score {} -> List PlayerStats
-getPlayersStats score =
+getMatchStats : Score {} -> List PlayerStats
+getMatchStats score =
     if score.score1 < score.score2 then
         [ PlayerStats score.player1 1 1 0 1 score.score1 score.score2
         , PlayerStats score.player2 1 2 1 0 score.score2 score.score1
@@ -38,22 +37,40 @@ getPlayersStats score =
         ]
 
 
-calculateScoresTable : List ( String, String ) -> List (Score {}) -> List PlayerStats
-calculateScoresTable users scores =
+getPlayersStats : List String -> List (Score {}) -> List PlayerStats
+getPlayersStats users scores =
     [ List.map initPlayerStats users
-    , List.concatMap getPlayersStats scores
+    , List.concatMap getMatchStats scores
     ]
         |> List.concat
-        |> List.foldl aggregateScoreWithStats Dict.empty
+
+
+playersStats2Dict : List PlayerStats -> Dict String PlayerStats
+playersStats2Dict stats =
+    stats
+        |> List.map (\s -> ( s.id, s ))
+        |> Dict.fromList
+
+
+createScoresTable : Dict String PlayerStats -> List PlayerStats -> List PlayerStats
+createScoresTable dict stats =
+    stats
+        |> List.foldl aggregateScoreWithStats dict
         |> Dict.values
         |> List.sortWith comparePlayerStats
         |> List.reverse
 
 
+recalculateScoresTableForUsers : List String -> List PlayerStats -> List PlayerStats
+recalculateScoresTableForUsers users stats =
+    List.map initPlayerStats users
+        |> createScoresTable (playersStats2Dict stats)
 
--- 3. foldl scores to dictionary of users and their stats
--- 4. dict 2 list
--- 5. custom sort
+
+calculateScoresTable : List String -> List (Score {}) -> List PlayerStats
+calculateScoresTable users scores =
+    getPlayersStats users scores
+        |> createScoresTable Dict.empty
 
 
 aggregateScoreWithStats : PlayerStats -> Dict String PlayerStats -> Dict String PlayerStats
