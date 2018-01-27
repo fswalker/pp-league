@@ -46,5 +46,19 @@ unitTests =
                             , PlayerStats "p3" 1 1 0 1 2 3
                             , PlayerStats "p2" 1 1 0 1 1 3
                             ]
+            , test "Given some users and three scores with three different users, When run, Then produce five valid stats" <|
+                \_ ->
+                    calculateScoresTable [ "p1", "p4" ]
+                        [ buildScore "p1" "p2" 3 1
+                        , buildScore "p1" "p3" 3 2
+                        , buildScore "p2" "p5" 3 0
+                        ]
+                        |> Expect.equal
+                            [ PlayerStats "p1" 2 4 2 0 6 3
+                            , PlayerStats "p2" 2 3 1 1 4 3
+                            , PlayerStats "p3" 1 1 0 1 2 3
+                            , PlayerStats "p5" 1 1 0 1 0 3
+                            , PlayerStats "p4" 0 0 0 0 0 0
+                            ]
             ]
         ]
