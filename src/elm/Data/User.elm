@@ -1,7 +1,13 @@
-module Data.User exposing (User(..), userDecoder)
+module Data.User
+    exposing
+        ( User(..)
+        , userDecoder
+        , getLeagueId
+        , getName
+        )
 
 import Json.Decode as Decode exposing (Decoder)
-import Data.Entity exposing (Entity)
+import Data.Entity exposing (Entity, Id)
 import Data.Player exposing (Player)
 
 
@@ -62,3 +68,29 @@ userDecoder =
                     else
                         Decode.succeed Anonymous
             )
+
+
+getLeagueId : User -> Maybe String
+getLeagueId =
+    getUser .league_id
+
+
+getName : User -> Maybe String
+getName =
+    getUser .name
+
+
+getUser : (Player (Entity (UserMetadata {})) -> a) -> User -> Maybe a
+getUser getter user =
+    case user of
+        Anonymous ->
+            Nothing
+
+        Player u ->
+            Just <| getter u
+
+        Admin u ->
+            Just <| getter u
+
+        ServerAdmin u ->
+            Just <| getter u

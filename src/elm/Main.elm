@@ -183,7 +183,7 @@ viewPage user page isLoading =
                     |> frame
 
             Home model ->
-                Home.view model
+                Home.view user model
                     |> frame
 
 

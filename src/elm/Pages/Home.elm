@@ -12,11 +12,12 @@ import Html.Attributes exposing (..)
 import Dict exposing (Dict, fromList)
 import Data.Entity exposing (Entity, Id)
 import Data.Round exposing (Round)
-import Data.User exposing (User(..))
+import Data.User as User exposing (User(..))
 import Data.Player exposing (Player)
 import Data.Score exposing (Score)
 import Data.PlayerStats as Stats exposing (PlayerStats)
 import Storage exposing (..)
+import Views.League as League
 
 
 type Msg
@@ -40,20 +41,20 @@ initialModel =
     }
 
 
-view : Model -> Html msg
-view { activeRound } =
-    case activeRound of
-        Nothing ->
-            text "Fetching active round or no round is active!"
-
-        Just round ->
-            div []
-                [ div [ class "level" ]
-                    [ h3 [ class "level-item is-size-3" ] [ text round.name ]
+view : User -> Model -> Html msg
+view user { activeRound, leaguePlayersDict, scores } =
+    case ( activeRound, leaguePlayersDict, scores ) of
+        ( Just round, Just playersDict, Just stats ) ->
+            div [ class "columns" ]
+                [ div [ class "column has-text-centered" ]
+                    [ h3 [ class "is-size-3" ] [ text round.name ]
+                    , h4 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text "TODO League name" ]
+                    , League.createLeagueTable (User.getName user) playersDict stats
                     ]
-                , div [ class "level" ]
-                    [ text "" ]
                 ]
+
+        _ ->
+            text "Fetching data..."
 
 
 update : User -> Msg -> Model -> ( Bool, Model, Cmd Msg )
@@ -127,7 +128,7 @@ tryCalculatingScoresTable mUsers mScores =
 
 tryCreatingGetScoresCommand : User -> (Maybe { a | id_ : Id } -> Cmd Msg)
 tryCreatingGetScoresCommand user activeRound =
-    case ( getLeagueId user, activeRound ) of
+    case ( User.getLeagueId user, activeRound ) of
         ( Just lid, Just ar ) ->
             ar
                 |> .id_
@@ -150,7 +151,7 @@ isDataLoadingDone model =
 
 init : User -> ( Model, Cmd Msg )
 init user =
-    case getLeagueId user of
+    case User.getLeagueId user of
         Nothing ->
             initialModel ! []
 
@@ -159,22 +160,6 @@ init user =
                 ! [ Storage.getActiveRound ()
                   , Storage.getLeaguePlayers league_id
                   ]
-
-
-getLeagueId : User -> Maybe String
-getLeagueId user =
-    case user of
-        Anonymous ->
-            Nothing
-
-        Player { league_id } ->
-            Just league_id
-
-        Admin { league_id } ->
-            Just league_id
-
-        ServerAdmin { league_id } ->
-            Just league_id
 
 
 createPlayersDict : Maybe (List (Player (Entity {}))) -> Maybe (Dict String String)
