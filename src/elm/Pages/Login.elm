@@ -47,48 +47,44 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "hero" ]
-        [ div [ class "hero-body" ]
-            [ div [ class "columns" ]
-                [ div [ class "column is-one-third is-offset-one-third" ]
-                    [ h2 [ class "is-size-3 has-text-centered" ] [ text "Login" ]
-                    , div [ class "field" ]
-                        [ p [ class "control has-icons-left" ]
-                            [ input
-                                [ class "input is-rounded"
-                                , type_ "email"
-                                , placeholder "Email"
-                                , value model.login
-                                , onInput InputLogin
-                                ]
-                                []
-                            , span [ class "icon is-small is-left" ]
-                                [ i [ class "fa fa-envelope" ] [] ]
-                            ]
+    div [ class "columns" ]
+        [ div [ class "column is-one-third is-offset-one-third" ]
+            [ h2 [ class "is-size-3 has-text-centered" ] [ text "Login" ]
+            , div [ class "field" ]
+                [ p [ class "control has-icons-left" ]
+                    [ input
+                        [ class "input is-rounded"
+                        , type_ "email"
+                        , placeholder "Email"
+                        , value model.login
+                        , onInput InputLogin
                         ]
-                    , div [ class "field" ]
-                        [ p [ class "control has-icons-left" ]
-                            [ input
-                                [ class "input is-rounded"
-                                , type_ "password"
-                                , placeholder "Password"
-                                , value model.password
-                                , onInput InputPassword
-                                ]
-                                []
-                            , span [ class "icon is-small is-left" ]
-                                [ i [ class "fa fa-lock" ] [] ]
-                            ]
+                        []
+                    , span [ class "icon is-small is-left" ]
+                        [ i [ class "fa fa-envelope" ] [] ]
+                    ]
+                ]
+            , div [ class "field" ]
+                [ p [ class "control has-icons-left" ]
+                    [ input
+                        [ class "input is-rounded"
+                        , type_ "password"
+                        , placeholder "Password"
+                        , value model.password
+                        , onInput InputPassword
                         ]
-                    , div [ class "field is-grouped is-grouped-right" ]
-                        [ p [ class "control" ]
-                            [ button
-                                [ class "button is-rounded is-success"
-                                , onClick (Login model)
-                                ]
-                                [ text "Login"
-                                ]
-                            ]
+                        []
+                    , span [ class "icon is-small is-left" ]
+                        [ i [ class "fa fa-lock" ] [] ]
+                    ]
+                ]
+            , div [ class "field is-grouped is-grouped-right" ]
+                [ p [ class "control" ]
+                    [ button
+                        [ class "button is-rounded is-success"
+                        , onClick (Login model)
+                        ]
+                        [ text "Login"
                         ]
                     ]
                 ]
