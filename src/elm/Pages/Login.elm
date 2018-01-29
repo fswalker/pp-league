@@ -55,7 +55,7 @@ view model =
                     , div [ class "field" ]
                         [ p [ class "control has-icons-left" ]
                             [ input
-                                [ class "input"
+                                [ class "input is-rounded"
                                 , type_ "email"
                                 , placeholder "Email"
                                 , value model.login
@@ -69,7 +69,7 @@ view model =
                     , div [ class "field" ]
                         [ p [ class "control has-icons-left" ]
                             [ input
-                                [ class "input"
+                                [ class "input is-rounded"
                                 , type_ "password"
                                 , placeholder "Password"
                                 , value model.password
@@ -83,7 +83,7 @@ view model =
                     , div [ class "field is-grouped is-grouped-right" ]
                         [ p [ class "control" ]
                             [ button
-                                [ class "button is-success"
+                                [ class "button is-rounded is-success"
                                 , onClick (Login model)
                                 ]
                                 [ text "Login"
