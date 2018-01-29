@@ -1,50 +1,9 @@
 @import "../../../node_modules/bulma/sass/utilities/initial-variables";
 @import mixins
-
-// PAGE
-.page-frame
-    margin-top: 1em
-
-// HEADER 
-.page-title,
-.greeting
-    +push-to-bottom
-
-    & .subtitle
-        margin: 0 1rem 0 0
-
-// NAV
-.navbar-brand > .navbar-item
-    padding-right: 0
-
-.navbar.main
-    border: 1px solid #cacaca
-    border-width: 1px 0 1px 0
-    margin: 1rem 0
-
-.navbar-menu
-    padding: 0 1rem;
-
-// CONTENT
-.page-content
-    min-height: 20rem
-
-// HOME
-.league-name
-    margin-bottom: .5rem
-
-// LEAGUE TABLE
-.league-table
-    width: 100%
-
-    .emed
-        background-color: rgba(219, 219, 219, 0.4)
-        font-weight: bold
-
-    th,
-    td
-        text-align: center
-
-// FOOTER
-.footer
-    padding: 0 1rem
+@import page
+@import header
+@import nav
+@import page
+@import home
+@import leagueTable
+@import footer
