@@ -28,7 +28,7 @@ type Msg
     | UpdateScores (Maybe (List (Score {})))
 
 
-type alias Model =
+type alias HomeData =
     { activeRound : Maybe Round
     , leaguePlayersDict : Maybe (Dict String String)
     , scores : Maybe (List PlayerStats)
@@ -36,47 +36,59 @@ type alias Model =
     }
 
 
+type Model
+    = Loading HomeData
+    | Display HomeData
+
+
 initialModel : Model
 initialModel =
-    { activeRound = Nothing
-    , leaguePlayersDict = Nothing
-    , scores = Nothing
-    , league = Nothing
-    }
+    Loading
+        { activeRound = Nothing
+        , leaguePlayersDict = Nothing
+        , scores = Nothing
+        , league = Nothing
+        }
 
 
 view : Session -> Model -> Html msg
-view { user, league } { activeRound, leaguePlayersDict, scores } =
-    case ( activeRound, leaguePlayersDict, scores ) of
-        ( Just round, Just playersDict, Just stats ) ->
-            div [ class "columns" ]
-                [ div [ class "column has-text-centered" ]
-                    [ h3 [ class "is-size-3" ] [ text round.name ]
-                    , h4 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text "TODO League name" ]
-                    , League.createLeagueTable (User.getName user) playersDict stats
-                    ]
-                ]
-
-        _ ->
+view { user, league } model =
+    case model of
+        Loading _ ->
             text "Fetching data..."
+
+        Display { activeRound, leaguePlayersDict, scores } ->
+            case ( activeRound, leaguePlayersDict, scores ) of
+                ( Just round, Just playersDict, Just stats ) ->
+                    div [ class "columns" ]
+                        [ div [ class "column has-text-centered" ]
+                            [ h3 [ class "is-size-3" ] [ text round.name ]
+                            , h4 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text "TODO League name" ]
+                            , League.createLeagueTable (User.getName user) playersDict stats
+                            ]
+                        ]
+
+                _ ->
+                    text "Could not load active round, players or scores data... TODO differentiate what is wrong"
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
 update { user, league } msg model =
-    case msg of
-        UpdateActiveRound maybeRound ->
+    case ( msg, model ) of
+        ( UpdateActiveRound maybeRound, Loading m ) ->
             let
                 newModel =
-                    { model
-                        | activeRound = maybeRound
-                    }
+                    Loading
+                        { m
+                            | activeRound = maybeRound
+                        }
             in
                 ( not <| isDataLoadingDone newModel
                 , newModel
                 , tryCreatingGetScoresCommand user maybeRound
                 )
 
-        UpdatePlayers maybePlayers ->
+        ( UpdatePlayers maybePlayers, Loading m ) ->
             let
                 playersDict =
                     createPlayersDict maybePlayers
@@ -85,30 +97,50 @@ update { user, league } msg model =
                     getUsersIds playersDict
 
                 stats =
-                    Maybe.withDefault [] model.scores
+                    Maybe.withDefault [] m.scores
 
-                newModel =
-                    { model
+                newModelData =
+                    { m
                         | leaguePlayersDict = playersDict
                         , scores = Just <| Stats.recalculateScoresTableForUsers usersIds stats
                     }
+
+                newModel =
+                    if m.scores /= Nothing then
+                        Display newModelData
+                    else
+                        Loading newModelData
             in
                 ( not <| isDataLoadingDone newModel
                 , newModel
                 , Cmd.none
                 )
 
-        UpdateScores maybeScores ->
+        ( UpdateScores maybeScores, Loading m ) ->
             let
-                newModel =
-                    { model
-                        | scores = tryCalculatingScoresTable model.leaguePlayersDict maybeScores
+                newModelData =
+                    { m
+                        | scores = tryCalculatingScoresTable m.leaguePlayersDict maybeScores
                     }
+
+                newModel =
+                    if m.leaguePlayersDict /= Nothing then
+                        Display newModelData
+                    else
+                        Loading newModelData
             in
                 ( not <| isDataLoadingDone newModel
                 , newModel
                 , Cmd.none
                 )
+
+        ( _, _ ) ->
+            Debug.crash "Investigate if this should be handled!!"
+
+
+
+-- TODO log error!!
+-- (False, model, Cmd.none)
 
 
 getUsersIds : Maybe (Dict String String) -> List String
@@ -145,12 +177,12 @@ tryCreatingGetScoresCommand user activeRound =
 
 isDataLoadingDone : Model -> Bool
 isDataLoadingDone model =
-    model.leaguePlayersDict
-        /= Nothing
-        && model.activeRound
-        /= Nothing
-        && model.scores
-        /= Nothing
+    case model of
+        Loading _ ->
+            False
+
+        Display _ ->
+            True
 
 
 init : Session -> ( Model, Cmd Msg )
