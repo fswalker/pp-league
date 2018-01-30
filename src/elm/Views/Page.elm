@@ -6,14 +6,14 @@ import Views.Loader as Loader
 import Views.Header as Header
 import Views.Navigation as Navigation
 import Views.Footer as Footer
-import Data.User as User exposing (User)
+import Data.Session as Session exposing (Session)
 
 
-frame : User -> Bool -> Html msg -> Html msg
-frame user isLoading content =
+frame : Session -> Bool -> Html msg -> Html msg
+frame session isLoading content =
     section [ class "hero is-fullheight" ]
         [ div [ class "hero-head" ]
-            [ Header.view user
+            [ Header.view session.user
             , Navigation.view
             ]
         , div [ classList [ ( "hero-body", True ), ( "page-frame", True ), ( "centered", isLoading ) ] ]

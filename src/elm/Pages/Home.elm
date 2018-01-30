@@ -12,7 +12,9 @@ import Html.Attributes exposing (..)
 import Dict exposing (Dict, fromList)
 import Data.Entity exposing (Entity, Id)
 import Data.Round exposing (Round)
+import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User(..))
+import Data.League exposing (League)
 import Data.Player exposing (Player)
 import Data.Score exposing (Score)
 import Data.PlayerStats as Stats exposing (PlayerStats)
@@ -30,6 +32,7 @@ type alias Model =
     { activeRound : Maybe Round
     , leaguePlayersDict : Maybe (Dict String String)
     , scores : Maybe (List PlayerStats)
+    , league : Maybe (League (Entity {}))
     }
 
 
@@ -38,11 +41,12 @@ initialModel =
     { activeRound = Nothing
     , leaguePlayersDict = Nothing
     , scores = Nothing
+    , league = Nothing
     }
 
 
-view : User -> Model -> Html msg
-view user { activeRound, leaguePlayersDict, scores } =
+view : Session -> Model -> Html msg
+view { user, league } { activeRound, leaguePlayersDict, scores } =
     case ( activeRound, leaguePlayersDict, scores ) of
         ( Just round, Just playersDict, Just stats ) ->
             div [ class "columns" ]
@@ -57,8 +61,8 @@ view user { activeRound, leaguePlayersDict, scores } =
             text "Fetching data..."
 
 
-update : User -> Msg -> Model -> ( Bool, Model, Cmd Msg )
-update user msg model =
+update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
+update { user, league } msg model =
     case msg of
         UpdateActiveRound maybeRound ->
             let
@@ -149,8 +153,8 @@ isDataLoadingDone model =
         /= Nothing
 
 
-init : User -> ( Model, Cmd Msg )
-init user =
+init : Session -> ( Model, Cmd Msg )
+init { user, league } =
     case User.getLeagueId user of
         Nothing ->
             initialModel ! []

@@ -8,6 +8,7 @@ import Views.Page as Page
 import Pages.Login as Login
 import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
+import Data.Session exposing (Session)
 import Data.Round exposing (Round, roundDecoder)
 import Data.Player exposing (Player, playersListDecoder)
 import Data.Score exposing (Score, scoresListDecoder)
@@ -25,7 +26,7 @@ type Page
 
 
 type alias Model =
-    { user : User
+    { session : Session
     , page : Page
     , isLoading : Bool
     }
@@ -33,7 +34,10 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { user = Anonymous
+    { session =
+        { user = Anonymous
+        , league = Nothing
+        }
     , page = Blank
     , isLoading = True
     }
@@ -74,16 +78,19 @@ setRoute route model =
             Just Route.Home ->
                 let
                     ( homeModel, homeCmds ) =
-                        Home.init model.user
+                        Home.init model.session
                 in
-                    { model
-                        | page = Home homeModel
-                        , isLoading = True
-                    }
-                        ! [ homeCmds |> Cmd.map HomeMsg ]
+                    if isUserAuthenticated model.session.user then
+                        { model
+                            | page = Home homeModel
+                            , isLoading = True
+                        }
+                            ! [ homeCmds |> Cmd.map HomeMsg ]
+                    else
+                        model ! [ Route.newUrl Route.Login ]
 
             Just Route.Login ->
-                if model.user /= Anonymous then
+                if model.session.user /= Anonymous then
                     ( model, Route.newUrl Route.Home )
                 else
                     { model
@@ -95,10 +102,23 @@ setRoute route model =
             Just Route.Logout ->
                 { model
                     | page = Blank
-                    , user = Anonymous
+                    , session =
+                        { user = Anonymous
+                        , league = Nothing
+                        }
                     , isLoading = True
                 }
                     ! [ Storage.logOut () ]
+
+
+isUserAuthenticated : User -> Bool
+isUserAuthenticated user =
+    case user of
+        Anonymous ->
+            False
+
+        _ ->
+            True
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -122,7 +142,7 @@ update msg model =
         ( HomeMsg homeMsg, Home homeModel ) ->
             let
                 ( isLoading, newModel, newCmd ) =
-                    Home.update model.user homeMsg homeModel
+                    Home.update model.session homeMsg homeModel
             in
                 { model
                     | page = Home newModel
@@ -142,16 +162,19 @@ update msg model =
 
 
 handleSessionChange : User -> Model -> ( Model, Cmd Msg )
-handleSessionChange user ({ page, isLoading } as model) =
+handleSessionChange user model =
     let
         command =
             if user == Anonymous then
                 Route.newUrl Route.Login
             else
                 Route.newUrl Route.Home
+
+        session =
+            model.session
     in
         { model
-            | user = user
+            | session = { session | user = user }
             , isLoading = True
         }
             ! [ command ]
@@ -162,15 +185,15 @@ handleSessionChange user ({ page, isLoading } as model) =
 
 
 view : Model -> Html Msg
-view { user, page, isLoading } =
-    viewPage user page isLoading
+view { session, page, isLoading } =
+    viewPage session page isLoading
 
 
-viewPage : User -> Page -> Bool -> Html Msg
-viewPage user page isLoading =
+viewPage : Session -> Page -> Bool -> Html Msg
+viewPage session page isLoading =
     let
         frame =
-            Page.frame user isLoading
+            Page.frame session isLoading
     in
         case page of
             Blank ->
@@ -183,7 +206,7 @@ viewPage user page isLoading =
                     |> frame
 
             Home model ->
-                Home.view user model
+                Home.view session model
                     |> frame
 
 
