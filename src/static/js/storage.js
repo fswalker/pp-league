@@ -12,7 +12,7 @@ export class Storage {
         const remoteOptions = { skip_setup: true };
         this.remote = new pouchDB(Constants.dbUrl, remoteOptions);
         this.local = new pouchDB(Constants.dbName);
-        this.local.sync(this.remote, { live: true, retry: true }).on('error', console.error.bind(console));
+        this.local.sync(this.remote, { live: true, retry: true }).on('error', err => console.error('Sync error', err));
         this._createIndexes();
         // this.test();
     }
