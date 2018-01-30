@@ -16,7 +16,7 @@ frame user isLoading content =
             [ Header.view user
             , Navigation.view
             ]
-        , div [ class "hero-body page-frame" ]
+        , div [ classList [ ( "hero-body", True ), ( "page-frame", True ), ( "centered", isLoading ) ] ]
             [ div [ class "container" ]
                 [ if isLoading then
                     Loader.loader

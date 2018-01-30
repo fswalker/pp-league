@@ -6,8 +6,8 @@ import Html.Attributes exposing (..)
 
 loader : Html msg
 loader =
-    div [ class "hero is-medium" ]
-        [ div [ class "hero-body" ]
+    div [ class "columns" ]
+        [ div [ class "column" ]
             [ div [ class "level" ]
                 [ div [ class "level-item" ]
                     [ div [ class "loader is-size-1" ] []
