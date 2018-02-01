@@ -20,6 +20,7 @@ import Data.Score exposing (Score)
 import Data.PlayerStats as Stats exposing (PlayerStats)
 import Storage exposing (..)
 import Views.League as League
+import Views.Home.NewScore as NewScore
 
 
 type Msg
@@ -36,9 +37,15 @@ type alias HomeData =
     }
 
 
+type alias FormData =
+    { player1 : Player {}
+    }
+
+
 type Model
     = Loading HomeData
-    | Display HomeData
+    | ScoreTable HomeData
+    | ScoreForm ( HomeData, FormData )
 
 
 initialModel : Model
@@ -57,7 +64,7 @@ view { user, league } model =
         Loading _ ->
             text "Fetching data..."
 
-        Display { activeRound, leaguePlayersDict, scores } ->
+        ScoreTable { activeRound, leaguePlayersDict, scores } ->
             let
                 leagueName =
                     league
@@ -76,6 +83,9 @@ view { user, league } model =
 
                     _ ->
                         text "Could not load active round, players or scores data... TODO differentiate what is wrong"
+
+        ScoreForm _ ->
+            NewScore.view
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
@@ -113,7 +123,7 @@ update { user, league } msg model =
 
                 newModel =
                     if m.scores /= Nothing then
-                        Display newModelData
+                        ScoreTable newModelData
                     else
                         Loading newModelData
             in
@@ -131,7 +141,7 @@ update { user, league } msg model =
 
                 newModel =
                     if m.leaguePlayersDict /= Nothing then
-                        Display newModelData
+                        ScoreTable newModelData
                     else
                         Loading newModelData
             in
@@ -187,7 +197,10 @@ isDataLoadingDone model =
         Loading _ ->
             False
 
-        Display _ ->
+        ScoreTable _ ->
+            True
+
+        ScoreForm _ ->
             True
 
 
