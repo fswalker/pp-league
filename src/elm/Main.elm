@@ -8,10 +8,11 @@ import Views.Page as Page
 import Pages.Login as Login
 import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
-import Data.Session exposing (Session)
+import Data.Session as Session exposing (Session)
 import Data.Round exposing (Round, roundDecoder)
 import Data.Player exposing (Player, playersListDecoder)
 import Data.Score exposing (Score, scoresListDecoder)
+import Data.League exposing (League, leagueDecoder)
 import Storage
 
 
@@ -34,10 +35,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { session =
-        { user = Anonymous
-        , league = Nothing
-        }
+    { session = Session.init
     , page = Blank
     , isLoading = True
     }
@@ -56,7 +54,7 @@ init location =
 type Msg
     = SetRoute (Maybe Route)
     | LoginMsg Login.Msg
-    | SessionMsg User
+    | SessionMsg Session.Msg
     | HomeMsg Home.Msg
 
 
@@ -127,8 +125,16 @@ update msg model =
         ( SetRoute maybeRoute, _ ) ->
             setRoute maybeRoute model
 
-        ( SessionMsg user, _ ) ->
-            handleSessionChange user model
+        ( SessionMsg msg, _ ) ->
+            let
+                ( newSession, cmd ) =
+                    Session.update msg model.session
+            in
+                { model
+                    | isLoading = True
+                    , session = newSession
+                }
+                    ! [ cmd ]
 
         ( LoginMsg loginMsg, Login loginModel ) ->
             let
@@ -159,25 +165,6 @@ update msg model =
                     Debug.log "model" m
             in
                 model ! [ Cmd.none ]
-
-
-handleSessionChange : User -> Model -> ( Model, Cmd Msg )
-handleSessionChange user model =
-    let
-        command =
-            if user == Anonymous then
-                Route.newUrl Route.Login
-            else
-                Route.newUrl Route.Home
-
-        session =
-            model.session
-    in
-        { model
-            | session = { session | user = user }
-            , isLoading = True
-        }
-            ! [ command ]
 
 
 
@@ -221,6 +208,10 @@ subscriptions =
             Decode.decodeValue roundDecoder
                 >> Result.toMaybe
 
+        decodeLeague =
+            Decode.decodeValue leagueDecoder
+                >> Result.toMaybe
+
         decodePlayers =
             Decode.decodeValue playersListDecoder
                 >> Result.toMaybe
@@ -231,7 +222,8 @@ subscriptions =
     in
         \_ ->
             Sub.batch
-                [ Storage.updateSession (decodeUser >> SessionMsg)
+                [ Storage.updateSession (decodeUser >> Session.UpdateUser >> SessionMsg)
+                , Storage.updateLeague (decodeLeague >> Session.UpdateLeague >> SessionMsg)
                 , Storage.updateActiveRound (decodeRound >> Home.UpdateActiveRound >> HomeMsg)
                 , Storage.updateLeaguePlayers (decodePlayers >> Home.UpdatePlayers >> HomeMsg)
                 , Storage.updateScores (decodeScores >> Home.UpdateScores >> HomeMsg)

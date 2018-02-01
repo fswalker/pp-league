@@ -153,6 +153,17 @@ export class Storage {
             .catch(failureFn);
     }
 
+    getLeague(league_id, successFn, failureFn) {
+        console.log('getLeague', league_id, this, successFn, failureFn);
+        return this.local.find({
+            selector: {
+               _id: league_id
+              }
+            })
+            .then(successFn)
+            .catch(failureFn);
+    }
+
     // session is an object returned from getSession method in PouchDB authentication plugin
     _getUserCtx(session) {
         return session && session.userCtx;
@@ -179,8 +190,9 @@ export class Storage {
         const errFn = (e) => console.log('error', e);
         // this.getSession(okFn, errFn);
         // this.getActiveRound(okFn, errFn);
-        this.getUsers(okFn, errFn);
-        this.getLeaguePlayers('16a596e5b990d9e498f93fbc94007e2a', okFn, errFn);
+        // this.getUsers(okFn, errFn);
+        // this.getLeaguePlayers('16a596e5b990d9e498f93fbc94007e2a', okFn, errFn);
+        this.getLeague('9dfba1a050738ca5cbbc5902130092c5', okFn, errFn);
 
     }
 

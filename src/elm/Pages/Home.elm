@@ -58,18 +58,24 @@ view { user, league } model =
             text "Fetching data..."
 
         Display { activeRound, leaguePlayersDict, scores } ->
-            case ( activeRound, leaguePlayersDict, scores ) of
-                ( Just round, Just playersDict, Just stats ) ->
-                    div [ class "columns" ]
-                        [ div [ class "column has-text-centered" ]
-                            [ h3 [ class "is-size-3" ] [ text round.name ]
-                            , h4 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text "TODO League name" ]
-                            , League.createLeagueTable (User.getName user) playersDict stats
+            let
+                leagueName =
+                    league
+                        |> Maybe.map .name
+                        |> Maybe.withDefault "Default League"
+            in
+                case ( activeRound, leaguePlayersDict, scores ) of
+                    ( Just round, Just playersDict, Just stats ) ->
+                        div [ class "columns" ]
+                            [ div [ class "column has-text-centered" ]
+                                [ h3 [ class "is-size-3" ] [ text round.name ]
+                                , h4 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text leagueName ]
+                                , League.createLeagueTable (User.getName user) playersDict stats
+                                ]
                             ]
-                        ]
 
-                _ ->
-                    text "Could not load active round, players or scores data... TODO differentiate what is wrong"
+                    _ ->
+                        text "Could not load active round, players or scores data... TODO differentiate what is wrong"
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
