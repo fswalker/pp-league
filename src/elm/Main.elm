@@ -157,17 +157,18 @@ update msg model =
                     ! [ Cmd.map HomeMsg newCmd ]
 
         ( s, m ) ->
-            let
-                _ =
-                    Debug.log "msg" s
-
-                _ =
-                    Debug.log "model" m
-            in
-                model ! [ Cmd.none ]
+            -- TODO create handler for each msg type - put case for model inside - the most safety
+            Debug.crash <| "TODO Main" ++ toString s ++ " " ++ toString m
 
 
 
+-- let
+--     _ =
+--         Debug.log "msg" s
+--     _ =
+--         Debug.log "model" m
+-- in
+--     model ! [ Cmd.none ]
 -- VIEW
 
 
