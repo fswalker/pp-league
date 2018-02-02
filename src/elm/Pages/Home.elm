@@ -9,6 +9,7 @@ module Pages.Home
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Dict exposing (Dict, fromList)
 import Data.Entity exposing (Entity, Id)
 import Data.Round exposing (Round)
@@ -19,7 +20,7 @@ import Data.Player exposing (Player)
 import Data.Score exposing (Score)
 import Data.PlayerStats as Stats exposing (PlayerStats)
 import Storage exposing (..)
-import Views.League as League
+import Views.LeagueTable as LeagueTable
 import Views.Home.NewScore as NewScore
 
 
@@ -27,6 +28,8 @@ type Msg
     = UpdateActiveRound (Maybe Round)
     | UpdatePlayers (Maybe (List (Player (Entity {}))))
     | UpdateScores (Maybe (List (Score {})))
+    | ShowNewScoreForm
+    | ShowLeagueTable
 
 
 type alias HomeData =
@@ -38,7 +41,7 @@ type alias HomeData =
 
 
 type alias FormData =
-    { player1 : Player {}
+    { player1 : Maybe String
     }
 
 
@@ -58,51 +61,36 @@ initialModel =
         }
 
 
-view : Session -> Model -> Html msg
+view : Session -> Model -> Html Msg
 view { user, league } model =
     case model of
         Loading _ ->
             text "Fetching data..."
 
         ScoreTable { activeRound, leaguePlayersDict, scores } ->
-            let
-                leagueName =
-                    league
-                        |> Maybe.map .name
-                        |> Maybe.withDefault "Default League"
-            in
-                case ( activeRound, leaguePlayersDict, scores ) of
-                    ( Just round, Just playersDict, Just stats ) ->
-                        div [ class "columns" ]
+            case ( activeRound, leaguePlayersDict, scores ) of
+                ( Just round, Just playersDict, Just stats ) ->
+                    div [ class "home-page" ]
+                        [ addNewScoreSection
+                        , div [ class "columns" ]
                             [ div [ class "column has-text-centered" ]
-                                [ h3 [ class "is-size-3" ] [ text round.name ]
-                                , h4 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text leagueName ]
-                                , League.createLeagueTable (User.getName user) playersDict stats
+                                [ LeagueTable.create (User.getName user) playersDict stats league round.name
                                 ]
                             ]
+                        ]
 
-                    _ ->
-                        text "Could not load active round, players or scores data... TODO differentiate what is wrong"
+                _ ->
+                    text "Could not load active round, players or scores data... TODO differentiate what is wrong"
 
         ScoreForm _ ->
             NewScore.view
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
-update { user, league } msg model =
+update ({ user, league } as session) msg model =
     case ( msg, model ) of
-        ( UpdateActiveRound maybeRound, Loading m ) ->
-            let
-                newModel =
-                    Loading
-                        { m
-                            | activeRound = maybeRound
-                        }
-            in
-                ( not <| isDataLoadingDone newModel
-                , newModel
-                , tryCreatingGetScoresCommand user maybeRound
-                )
+        ( UpdateActiveRound maybeRound, (Loading _) as m ) ->
+            updateActiveRoundHandler user maybeRound m
 
         ( UpdatePlayers maybePlayers, Loading m ) ->
             let
@@ -150,8 +138,51 @@ update { user, league } msg model =
                 , Cmd.none
                 )
 
+        ( ShowNewScoreForm, ScoreTable data ) ->
+            ( False
+            , ScoreForm ( data, initNewScoreFormData session )
+            , Cmd.none
+            )
+
+        ( ShowNewScoreForm, _ ) ->
+            passUnchanged model
+
         ( _, _ ) ->
+            -- TODO create handler for each msg type - put case for model inside - the most safety
             Debug.crash "Investigate if this should be handled!!"
+
+
+updateActiveRoundHandler : User -> Maybe Round -> Model -> ( Bool, Model, Cmd Msg )
+updateActiveRoundHandler user maybeRound model =
+    case model of
+        Loading m ->
+            let
+                newModel =
+                    Loading
+                        { m
+                            | activeRound = maybeRound
+                        }
+            in
+                ( not <| isDataLoadingDone newModel
+                , newModel
+                , tryCreatingGetScoresCommand user maybeRound
+                )
+
+        ScoreTable m ->
+            passUnchanged model
+
+        ScoreForm m ->
+            passUnchanged model
+
+
+initNewScoreFormData : Session -> FormData
+initNewScoreFormData { user, league } =
+    { player1 = User.getName user }
+
+
+passUnchanged : Model -> ( Bool, Model, Cmd Msg )
+passUnchanged model =
+    ( False, model, Cmd.none )
 
 
 
@@ -223,3 +254,20 @@ createPlayersDict =
         (List.filterMap (\p -> p |> .id_ |> (Maybe.map (\id_ -> ( id_, p.nick ))))
             >> Dict.fromList
         )
+
+
+addNewScoreSection : Html Msg
+addNewScoreSection =
+    div [ class "level" ]
+        [ div [ class "level-left" ] []
+        , div [ class "level-right" ]
+            [ div [ class "level-item" ]
+                [ button
+                    [ class "button is-rounded is-success"
+                    , title "New Score button"
+                    , onClick ShowNewScoreForm
+                    ]
+                    [ text "New Score" ]
+                ]
+            ]
+        ]

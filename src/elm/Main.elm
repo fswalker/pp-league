@@ -195,6 +195,7 @@ viewPage session page isLoading =
 
             Home model ->
                 Home.view session model
+                    |> Html.map HomeMsg
                     |> frame
 
 
