@@ -11,15 +11,15 @@ view =
             [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Score" ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
-                    [ text "P1" ]
+                    [ viewPlayerDropdown "Player 1" ]
                 , div [ class "column" ]
-                    [ text "P2" ]
+                    [ viewPlayerDropdown "Player 2" ]
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
-                    [ text "S1" ]
+                    [ viewScoreInput "Score 1" ]
                 , div [ class "column" ]
-                    [ text "S2" ]
+                    [ viewScoreInput "Score 2" ]
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
@@ -39,3 +39,45 @@ view =
                 ]
             ]
         ]
+
+
+fieldWrapper : String -> Html msg -> Html msg
+fieldWrapper labelText control =
+    div [ class "field" ]
+        [ label [ class "label" ] [ text labelText ]
+        , control
+        ]
+
+
+viewPlayerDropdown : String -> Html msg
+viewPlayerDropdown labelText =
+    p [ class "control is-expanded has-icons-left" ]
+        [ span [ class "select is-fullwidth" ]
+            [ select []
+                [ option [ selected True ] [ text "Choose player..." ]
+                , option [] [ text "Player 1" ]
+                , option [] [ text "Player 2" ]
+                , option [] [ text "Player 3" ]
+                ]
+            ]
+        , span [ class "icon is-small is-left" ]
+            [ i [ class "fa fa-user" ] [] ]
+        ]
+        |> fieldWrapper labelText
+
+
+viewScoreInput : String -> Html msg
+viewScoreInput labelText =
+    div [ class "control is-expaned has-icons-left" ]
+        [ input
+            [ class "input"
+            , type_ "number"
+            , value "0"
+            , Html.Attributes.min "0"
+            , Html.Attributes.max "3"
+            ]
+            []
+        , span [ class "icon is-small is-left" ]
+            [ i [ class "fa fa-trophy" ] [] ]
+        ]
+        |> fieldWrapper labelText
