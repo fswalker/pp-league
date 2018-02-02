@@ -81,7 +81,7 @@ view model =
             , div [ class "field is-grouped is-grouped-right" ]
                 [ p [ class "control" ]
                     [ button
-                        [ class "button is-rounded is-success"
+                        [ class "button is-rounded is-primary"
                         , onClick (Login model)
                         ]
                         [ text "Login"
