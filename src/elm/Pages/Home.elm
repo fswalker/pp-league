@@ -30,6 +30,7 @@ type Msg
     | UpdateScores (Maybe (List (Score {})))
     | ShowNewScoreForm
     | ShowLeagueTable
+    | NewScoreFormMsg NewScore.Msg
 
 
 type alias HomeData =
@@ -40,15 +41,10 @@ type alias HomeData =
     }
 
 
-type alias FormData =
-    { player1 : Maybe String
-    }
-
-
 type Model
     = Loading HomeData
     | ScoreTable HomeData
-    | ScoreForm ( HomeData, FormData )
+    | ScoreForm ( HomeData, NewScore.Model )
 
 
 initialModel : Model
@@ -84,6 +80,7 @@ view { user, league } model =
 
         ScoreForm _ ->
             NewScore.view
+                |> Html.map NewScoreFormMsg
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
@@ -147,9 +144,35 @@ update ({ user, league } as session) msg model =
         ( ShowNewScoreForm, _ ) ->
             passUnchanged model
 
+        ( NewScoreFormMsg nsMsg, (ScoreForm _) as sfModel ) ->
+            -- TODO handle commands?
+            ( False
+            , handleNewScoreFormMsg nsMsg sfModel
+            , Cmd.none
+            )
+
         ( _, _ ) ->
             -- TODO create handler for each msg type - put case for model inside - the most safety
+            -- TODO or remove it and just add logging to DB
             Debug.crash "Investigate if this should be handled!!"
+
+
+handleNewScoreFormMsg : NewScore.Msg -> Model -> Model
+handleNewScoreFormMsg msg model =
+    case model of
+        ScoreForm ( homeData, formData ) ->
+            if msg == NewScore.Cancel then
+                ScoreTable homeData
+            else
+                let
+                    -- TODO Task ??
+                    updatedNewScoreFormModel =
+                        NewScore.update msg formData
+                in
+                    ScoreForm ( homeData, updatedNewScoreFormModel )
+
+        _ ->
+            model
 
 
 updateActiveRoundHandler : User -> Maybe Round -> Model -> ( Bool, Model, Cmd Msg )
@@ -175,7 +198,7 @@ updateActiveRoundHandler user maybeRound model =
             passUnchanged model
 
 
-initNewScoreFormData : Session -> FormData
+initNewScoreFormData : Session -> NewScore.Model
 initNewScoreFormData { user, league } =
     { player1 = User.getName user }
 

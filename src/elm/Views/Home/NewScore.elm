@@ -1,14 +1,37 @@
-module Views.Home.NewScore exposing (view)
+module Views.Home.NewScore
+    exposing
+        ( Model
+        , Msg(..)
+        , view
+        , update
+        )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 
-view : Html msg
+type alias Model =
+    { player1 : Maybe String
+    }
+
+
+type Msg
+    = Cancel
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        Cancel ->
+            model
+
+
+view : Html Msg
 view =
     div [ class "new-score-form columns is-centered" ]
         [ div [ class "column is-half-desktop is-two-thirds-tablet has-text-centered is-size-5" ]
-            [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Score" ]
+            [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Result" ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
                     [ viewPlayerDropdown "Player 1" ]
@@ -31,7 +54,11 @@ view =
                 [ div [ class "column" ]
                     [ div [ class "level" ]
                         [ div [ class "level-left" ]
-                            [ button [ class "button level-item" ] [ text "Cancel" ]
+                            [ button
+                                [ class "button level-item"
+                                , onClick Cancel
+                                ]
+                                [ text "Cancel" ]
                             , button [ class "button level-item" ] [ text "Add" ]
                             ]
                         ]
