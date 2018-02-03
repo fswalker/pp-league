@@ -15,7 +15,6 @@ import Data.Entity exposing (Entity, Id)
 import Data.Round exposing (Round)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User(..))
-import Data.League exposing (League)
 import Data.Player exposing (Player)
 import Data.Score exposing (Score)
 import Data.PlayerStats as Stats exposing (PlayerStats)
@@ -37,7 +36,6 @@ type alias HomeData =
     { activeRound : Maybe Round
     , leaguePlayersDict : Maybe (Dict String String)
     , scores : Maybe (List PlayerStats)
-    , league : Maybe (League (Entity {}))
     }
 
 
@@ -53,7 +51,6 @@ initialModel =
         { activeRound = Nothing
         , leaguePlayersDict = Nothing
         , scores = Nothing
-        , league = Nothing
         }
 
 
