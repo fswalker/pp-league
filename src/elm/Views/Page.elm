@@ -6,7 +6,7 @@ import Views.Loader as Loader
 import Views.Header as Header
 import Views.Navigation as Navigation
 import Views.Footer as Footer
-import Data.Session as Session exposing (Session)
+import Session as Session exposing (Session)
 
 
 frame : Session -> Bool -> Html msg -> Html msg

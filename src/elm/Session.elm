@@ -1,4 +1,4 @@
-module Data.Session
+module Session
     exposing
         ( Session
         , Msg(..)
@@ -7,7 +7,6 @@ module Data.Session
         )
 
 import Route exposing (Route)
-import Data.Entity exposing (Entity)
 import Data.User as User exposing (User(..))
 import Data.League exposing (League)
 import Storage

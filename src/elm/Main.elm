@@ -8,7 +8,7 @@ import Views.Page as Page
 import Pages.Login as Login
 import Pages.Home as Home
 import Data.User exposing (User(..), userDecoder)
-import Data.Session as Session exposing (Session)
+import Session as Session exposing (Session)
 import Data.Round exposing (Round, roundDecoder)
 import Data.Player exposing (Player, playersListDecoder)
 import Data.Score exposing (Score, scoresListDecoder)
