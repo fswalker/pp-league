@@ -74,18 +74,18 @@ setRoute route model =
                     ! [ Cmd.none ]
 
             Just Route.Home ->
-                let
-                    ( homeModel, homeCmds ) =
-                        Home.init model.session
-                in
-                    if isUserAuthenticated model.session.user then
+                if isAuthenticated model.session.user then
+                    let
+                        ( homeModel, homeCmds ) =
+                            Home.init model.session
+                    in
                         { model
                             | page = Home homeModel
                             , isLoading = True
                         }
                             ! [ homeCmds |> Cmd.map HomeMsg ]
-                    else
-                        model ! [ Route.newUrl Route.Login ]
+                else
+                    model ! [ Route.newUrl Route.Login ]
 
             Just Route.Login ->
                 if model.session.user /= Anonymous then
@@ -109,8 +109,8 @@ setRoute route model =
                     ! [ Storage.logOut () ]
 
 
-isUserAuthenticated : User -> Bool
-isUserAuthenticated user =
+isAuthenticated : User -> Bool
+isAuthenticated user =
     case user of
         Anonymous ->
             False
