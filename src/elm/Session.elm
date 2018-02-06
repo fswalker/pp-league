@@ -9,37 +9,75 @@ module Session
 import Route exposing (Route)
 import Data.User as User exposing (User(..))
 import Data.League exposing (League)
+import Data.Round exposing (Round)
+import Data.Request exposing (Request(..))
 import Storage
 
 
 type Msg
     = UpdateUser User
     | UpdateLeague (Maybe (League {}))
+    | UpdateRound (Maybe Round)
 
 
 type alias Session =
     { user : User
-    , league : Maybe (League {})
+    , league : Request (Maybe (League {}))
+    , activeRound : Request (Maybe Round)
     }
-
-
-getCmd : Session -> Cmd msg
-getCmd session =
-    if session.user == Anonymous then
-        Route.newUrl Route.Login
-    else if session.league == Nothing then
-        User.getLeagueId session.user
-            |> Maybe.map Storage.getLeague
-            |> Maybe.withDefault Cmd.none
-    else
-        Route.newUrl Route.Home
 
 
 init : Session
 init =
     { user = User.Anonymous
-    , league = Nothing
+    , league = NotStarted
+    , activeRound = NotStarted
     }
+
+
+fetchDataForUser : Session -> ( Session, Cmd msg )
+fetchDataForUser session =
+    if session.user == Anonymous then
+        ( session, Route.newUrl Route.Login )
+    else
+        { session
+            | league = Loading
+            , activeRound = Loading
+        }
+            ! [ getLeagueCmd session
+              , getRoundCmd session
+              ]
+
+
+getLeagueCmd : Session -> Cmd msg
+getLeagueCmd session =
+    if session.league == NotStarted then
+        User.getLeagueId session.user
+            |> Maybe.map Storage.getLeague
+            |> Maybe.withDefault Cmd.none
+    else
+        Cmd.none
+
+
+getRoundCmd : Session -> Cmd msg
+getRoundCmd session =
+    if session.activeRound == NotStarted then
+        Storage.getActiveRound ()
+    else
+        Cmd.none
+
+
+getRouteHomeCmd : Session -> Session -> Cmd msg
+getRouteHomeCmd oldSession { league, activeRound } =
+    case ( oldSession.league, league, oldSession.activeRound, activeRound ) of
+        ( Loading, Ready _, Ready _, Ready _ ) ->
+            Route.newUrl Route.Home
+
+        ( Ready _, Ready _, Loading, Ready _ ) ->
+            Route.newUrl Route.Home
+
+        _ ->
+            Cmd.none
 
 
 update : Msg -> Session -> ( Session, Cmd msg )
@@ -50,11 +88,18 @@ update msg session =
                 newModel =
                     { session | user = u }
             in
-                ( newModel, getCmd newModel )
+                fetchDataForUser newModel
 
         UpdateLeague ml ->
             let
-                newModel =
-                    { session | league = ml }
+                newSession =
+                    { session | league = Ready ml }
             in
-                ( newModel, getCmd newModel )
+                ( newSession, getRouteHomeCmd session newSession )
+
+        UpdateRound mr ->
+            let
+                newSession =
+                    { session | activeRound = Ready mr }
+            in
+                ( newSession, getRouteHomeCmd session newSession )

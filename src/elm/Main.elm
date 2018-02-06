@@ -73,6 +73,24 @@ setRoute route model =
                 }
                     ! [ Cmd.none ]
 
+            Just Route.Login ->
+                if isAuthenticated model.session.user then
+                    ( model, Route.newUrl Route.Home )
+                else
+                    { model
+                        | page = Login (Login.init)
+                        , isLoading = False
+                    }
+                        ! [ Cmd.none ]
+
+            Just Route.Logout ->
+                { model
+                    | page = Blank
+                    , session = Session.init
+                    , isLoading = True
+                }
+                    ! [ Storage.logOut () ]
+
             Just Route.Home ->
                 if isAuthenticated model.session.user then
                     let
@@ -86,27 +104,6 @@ setRoute route model =
                             ! [ homeCmds |> Cmd.map HomeMsg ]
                 else
                     model ! [ Route.newUrl Route.Login ]
-
-            Just Route.Login ->
-                if model.session.user /= Anonymous then
-                    ( model, Route.newUrl Route.Home )
-                else
-                    { model
-                        | page = Login (Login.init)
-                        , isLoading = False
-                    }
-                        ! [ Cmd.none ]
-
-            Just Route.Logout ->
-                { model
-                    | page = Blank
-                    , session =
-                        { user = Anonymous
-                        , league = Nothing
-                        }
-                    , isLoading = True
-                }
-                    ! [ Storage.logOut () ]
 
 
 isAuthenticated : User -> Bool
@@ -226,7 +223,7 @@ subscriptions =
             Sub.batch
                 [ Storage.updateSession (decodeUser >> Session.UpdateUser >> SessionMsg)
                 , Storage.updateLeague (decodeLeague >> Session.UpdateLeague >> SessionMsg)
-                , Storage.updateActiveRound (decodeRound >> Home.UpdateActiveRound >> HomeMsg)
+                , Storage.updateActiveRound (decodeRound >> Session.UpdateRound >> SessionMsg)
                 , Storage.updateLeaguePlayers (decodePlayers >> Home.UpdatePlayers >> HomeMsg)
                 , Storage.updateScores (decodeScores >> Home.UpdateScores >> HomeMsg)
                 ]

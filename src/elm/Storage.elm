@@ -41,6 +41,11 @@ port getLeaguePlayers : String -> Cmd msg
 port updateLeaguePlayers : (Value -> msg) -> Sub msg
 
 
+
+-- TODO change to record!
+-- league_id, round_id
+
+
 port getScores : ( String, String ) -> Cmd msg
 
 

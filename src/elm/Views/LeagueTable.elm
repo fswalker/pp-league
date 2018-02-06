@@ -5,18 +5,19 @@ import Html.Attributes exposing (..)
 import Dict exposing (Dict)
 import Data.PlayerStats exposing (PlayerStats)
 import Data.League exposing (League)
+import Data.Round exposing (Round)
 
 
-create : Maybe String -> Dict String String -> List PlayerStats -> Maybe (League a) -> String -> Html msg
-create loggedInUser playersDict stats league roundName =
+create : Maybe String -> Dict String String -> List PlayerStats -> Maybe (League a) -> Round -> Html msg
+create loggedInUser playersDict stats mLeague round =
     let
         leagueName =
-            league
+            mLeague
                 |> Maybe.map .name
                 |> Maybe.withDefault "Default League"
 
         headerTitle =
-            leagueName ++ " - " ++ roundName
+            leagueName ++ " - " ++ round.name
     in
         div []
             [ h3 [ class "league-name is-size-4 has-text-left has-text-weight-bold" ] [ text headerTitle ]
