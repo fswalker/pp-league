@@ -6,7 +6,8 @@ import Navigation exposing (Location)
 import Route exposing (Route)
 import Storage
 import Session as Session exposing (Session)
-import Data.User exposing (User(..), userDecoder)
+import Data.Entity as Entity exposing (Entity)
+import Data.User as User exposing (User(..), userDecoder)
 import Data.Round exposing (Round, roundDecoder)
 import Data.Player exposing (Player, playersListDecoder)
 import Data.Score exposing (Score, scoresListDecoder)
@@ -57,6 +58,7 @@ type Msg
     = SetRoute (Maybe Route)
     | LoginMsg Login.Msg
     | SessionMsg Session.Msg
+    | UpdateLeaguePlayers (Maybe (List (Player (Entity {}))))
     | HomeMsg Home.Msg
     | NewScoreMsg NewScore.Msg
 
@@ -112,7 +114,7 @@ setRoute route model =
                 if isAuthenticated model.session.user then
                     let
                         ( scoreModel, scoreCmds ) =
-                            NewScore.init
+                            NewScore.init model.session
                     in
                         { model
                             | page = NewScore scoreModel
@@ -125,12 +127,7 @@ setRoute route model =
 
 isAuthenticated : User -> Bool
 isAuthenticated user =
-    case user of
-        Anonymous ->
-            False
-
-        _ ->
-            True
+    not <| User.isAnonymous user
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -160,15 +157,24 @@ update msg model =
 
         -- TODO handle model and create handler function for that case!
         ( HomeMsg homeMsg, Home homeModel ) ->
+            handleHomeMsg model homeMsg homeModel
+
+        ( NewScoreMsg scoreMsg, NewScore scoreModel ) ->
             let
                 ( isLoading, newModel, newCmd ) =
-                    Home.update model.session homeMsg homeModel
+                    NewScore.update model.session scoreMsg scoreModel
             in
                 { model
-                    | page = Home newModel
+                    | page = NewScore newModel
                     , isLoading = isLoading
                 }
-                    ! [ Cmd.map HomeMsg newCmd ]
+                    ! [ Cmd.map NewScoreMsg newCmd ]
+
+        ( UpdateLeaguePlayers players, Home homeModel ) ->
+            handleHomeMsg model (Home.UpdatePlayers players) homeModel
+
+        ( UpdateLeaguePlayers players, NewScore scoreModel ) ->
+            handleNewScoreMsg model (NewScore.UpdatePlayers players) scoreModel
 
         ( s, m ) ->
             -- TODO create handler for each msg type - put case for model inside - the most safety
@@ -246,7 +252,7 @@ subscriptions =
                 [ Storage.updateSession (decodeUser >> Session.UpdateUser >> SessionMsg)
                 , Storage.updateLeague (decodeLeague >> Session.UpdateLeague >> SessionMsg)
                 , Storage.updateActiveRound (decodeRound >> Session.UpdateRound >> SessionMsg)
-                , Storage.updateLeaguePlayers (decodePlayers >> Home.UpdatePlayers >> HomeMsg)
+                , Storage.updateLeaguePlayers (decodePlayers >> UpdateLeaguePlayers)
                 , Storage.updateScores (decodeScores >> Home.UpdateScores >> HomeMsg)
                 ]
 
@@ -259,3 +265,29 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+handleHomeMsg : Model -> Home.Msg -> Home.Model -> ( Model, Cmd Msg )
+handleHomeMsg mainModel homeMessage homeModel =
+    let
+        ( isLoading, newHomeModel, newCmd ) =
+            Home.update mainModel.session homeMessage homeModel
+    in
+        { mainModel
+            | page = Home newHomeModel
+            , isLoading = isLoading
+        }
+            ! [ Cmd.map HomeMsg newCmd ]
+
+
+handleNewScoreMsg : Model -> NewScore.Msg -> NewScore.Model -> ( Model, Cmd Msg )
+handleNewScoreMsg mainModel message scoreModel =
+    let
+        ( isLoading, newModel, newCmd ) =
+            NewScore.update mainModel.session message scoreModel
+    in
+        { mainModel
+            | page = NewScore newModel
+            , isLoading = isLoading
+        }
+            ! [ Cmd.map NewScoreMsg newCmd ]
