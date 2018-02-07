@@ -5,6 +5,7 @@ module Data.User
         , getLeagueId
         , getName
         , isAnonymous
+        , isPlayer
         )
 
 import Json.Decode as Decode exposing (Decoder)
@@ -82,11 +83,18 @@ getName =
 
 
 isAnonymous : User -> Bool
-isAnonymous user =
-    if user == Anonymous then
-        True
-    else
-        False
+isAnonymous =
+    (==) Anonymous
+
+
+isPlayer : User -> Bool
+isPlayer user =
+    case user of
+        Player _ ->
+            True
+
+        _ ->
+            False
 
 
 getUser : (Player (Entity (UserMetadata {})) -> a) -> User -> Maybe a
