@@ -4,22 +4,24 @@ import Html exposing (..)
 import Json.Decode as Decode
 import Navigation exposing (Location)
 import Route exposing (Route)
-import Views.Page as Page
-import Pages.Login as Login
-import Pages.Home as Home
-import Data.User exposing (User(..), userDecoder)
+import Storage
 import Session as Session exposing (Session)
+import Data.User exposing (User(..), userDecoder)
 import Data.Round exposing (Round, roundDecoder)
 import Data.Player exposing (Player, playersListDecoder)
 import Data.Score exposing (Score, scoresListDecoder)
 import Data.League exposing (League, leagueDecoder)
-import Storage
+import Views.Page as Page
+import Pages.Login as Login
+import Pages.Home as Home
+import Pages.NewScore as NewScore
 
 
 type Page
     = Blank
     | Login Login.Model
     | Home Home.Model
+    | NewScore NewScore.Model
 
 
 
@@ -56,6 +58,7 @@ type Msg
     | LoginMsg Login.Msg
     | SessionMsg Session.Msg
     | HomeMsg Home.Msg
+    | NewScoreMsg NewScore.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -102,6 +105,20 @@ setRoute route model =
                             , isLoading = True
                         }
                             ! [ homeCmds |> Cmd.map HomeMsg ]
+                else
+                    model ! [ Route.newUrl Route.Login ]
+
+            Just Route.NewScore ->
+                if isAuthenticated model.session.user then
+                    let
+                        ( scoreModel, scoreCmds ) =
+                            NewScore.init
+                    in
+                        { model
+                            | page = NewScore scoreModel
+                            , isLoading = True
+                        }
+                            ! [ scoreCmds |> Cmd.map NewScoreMsg ]
                 else
                     model ! [ Route.newUrl Route.Login ]
 
@@ -193,6 +210,11 @@ viewPage session page isLoading =
             Home model ->
                 Home.view session model
                     |> Html.map HomeMsg
+                    |> frame
+
+            NewScore model ->
+                NewScore.view session model
+                    |> Html.map NewScoreMsg
                     |> frame
 
 

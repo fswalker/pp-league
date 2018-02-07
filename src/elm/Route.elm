@@ -16,6 +16,7 @@ type Route
     = Home
     | Login
     | Logout
+    | NewScore
 
 
 route : Parser (Route -> a) a
@@ -24,6 +25,7 @@ route =
         [ map Home top
         , map Login (s "login")
         , map Logout (s "logout")
+        , map NewScore (s "newScore")
         ]
 
 
@@ -39,6 +41,9 @@ routeToStr route =
 
             Logout ->
                 "logout"
+
+            NewScore ->
+                "newScore"
 
 
 fromLocation : Location -> Maybe Route
