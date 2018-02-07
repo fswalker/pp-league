@@ -29,8 +29,8 @@ route =
         ]
 
 
-routeToStr : Route -> String
-routeToStr route =
+toStr : Route -> String
+toStr route =
     "#/"
         ++ case route of
             Home ->
@@ -56,9 +56,9 @@ fromLocation location =
 
 newUrl : Route -> Cmd msg
 newUrl =
-    routeToStr >> Navigation.newUrl
+    toStr >> Navigation.newUrl
 
 
 href : Route -> Attribute msg
 href =
-    Attr.href << routeToStr
+    Attr.href << toStr

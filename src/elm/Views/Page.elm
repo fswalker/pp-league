@@ -14,7 +14,7 @@ frame session isLoading content =
     section [ class "hero is-fullheight" ]
         [ div [ class "hero-head" ]
             [ Header.view session.user
-            , Navigation.view
+            , Navigation.view session.user
             ]
         , div [ classList [ ( "hero-body", True ), ( "page-frame", True ), ( "centered", isLoading ) ] ]
             [ div [ class "container" ]
