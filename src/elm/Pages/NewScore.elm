@@ -8,12 +8,12 @@ module Pages.NewScore
         )
 
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Data.Entity as Entity exposing (Entity)
 import Data.Player as Player exposing (Player)
 import Data.User as User exposing (User)
 import Session as Session exposing (Session)
 import Storage
-import Views.Home.NewScore as NewScoreView
 
 
 type alias Model =
@@ -26,7 +26,6 @@ type alias Model =
 
 type Msg
     = UpdatePlayers (Maybe (List (Player (Entity {}))))
-    | FormMsg NewScoreView.Msg
 
 
 playerModel : User -> Model
@@ -68,15 +67,6 @@ update session msg model =
             in
                 ( False, newModel, Cmd.none )
 
-        FormMsg formMsg ->
-            ( False, model, Cmd.none )
-
-
-view : Session -> Model -> Html Msg
-view session model =
-    NewScoreView.view
-        |> Html.map FormMsg
-
 
 findPlayer : Maybe String -> List (Player (Entity {})) -> Maybe (Player (Entity {}))
 findPlayer userName players =
@@ -91,3 +81,102 @@ setPlayer1 user players model =
         { model | player1 = Maybe.andThen (findPlayer (User.getName user)) players }
     else
         model
+
+
+view : Session -> Model -> Html Msg
+view session model =
+    div [ class "new-score-form columns is-centered" ]
+        [ div [ class "column is-half-desktop is-two-thirds-tablet has-text-centered is-size-5" ]
+            [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Result" ]
+            , div [ class "columns is-mobile" ]
+                [ div [ class "column" ]
+                    [ viewPlayerDropdown "Player 1" model.player1 model.player2 model.leaguePlayers ]
+                , div [ class "column" ]
+                    [ viewPlayerDropdown "Player 2" model.player2 model.player1 model.leaguePlayers ]
+                ]
+            , div [ class "columns is-mobile" ]
+                [ div [ class "column" ]
+                    [ viewScoreInput "Score 1" ]
+                , div [ class "column" ]
+                    [ viewScoreInput "Score 2" ]
+                ]
+            , div [ class "columns is-mobile" ]
+                [ div [ class "column" ]
+                    [ text "Date" ]
+                , div [ class "column" ]
+                    []
+                ]
+            , div [ class "columns is-mobile" ]
+                [ div [ class "column" ]
+                    [ div [ class "level" ]
+                        [ div [ class "level-left" ] []
+                        , div [ class "level-right" ]
+                            [ button [ class "button level-item is-success" ] [ text "Add" ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+
+fieldWrapper : String -> Html msg -> Html msg
+fieldWrapper labelText control =
+    div [ class "field" ]
+        [ label [ class "label" ] [ text labelText ]
+        , control
+        ]
+
+
+viewPlayerDropdown :
+    String
+    -> Maybe (Player (Entity {}))
+    -> Maybe (Player (Entity {}))
+    -> Maybe (List (Player (Entity {})))
+    -> Html msg
+viewPlayerDropdown labelText thisPlayer otherPlayer players =
+    p [ class "control is-expanded has-icons-left" ]
+        [ span [ class "select is-fullwidth" ]
+            [ select []
+                (renderOptions players)
+            ]
+        , span [ class "icon is-small is-left" ]
+            [ i [ class "fa fa-user" ] [] ]
+        ]
+        |> fieldWrapper labelText
+
+
+renderOptions : Maybe (List (Player (Entity {}))) -> List (Html msg)
+renderOptions players =
+    option [ selected True ] [ text "Choose player..." ]
+        :: (players
+                |> Maybe.withDefault []
+                |> List.filter (\p -> p.id_ /= Nothing)
+                |> List.sortBy .nick
+                |> List.map renderOption
+           )
+
+
+renderOption : Player (Entity {}) -> Html msg
+renderOption { id_, nick } =
+    Maybe.map
+        (\v -> option [ value v ] [ text nick ])
+        id_
+        |> Maybe.withDefault (text "")
+
+
+viewScoreInput : String -> Html msg
+viewScoreInput labelText =
+    div [ class "control is-expaned has-icons-left" ]
+        [ input
+            [ class "input"
+            , type_ "number"
+            , value "0"
+            , Html.Attributes.min "0"
+            , Html.Attributes.max "3"
+            ]
+            []
+        , span [ class "icon is-small is-left" ]
+            [ i [ class "fa fa-trophy" ] [] ]
+        ]
+        |> fieldWrapper labelText
