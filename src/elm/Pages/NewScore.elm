@@ -63,7 +63,7 @@ update session msg model =
             let
                 newModel =
                     { model | leaguePlayers = players }
-                        |> setPlayer1 session.user players
+                        |> trySetPlayer1 session.user players
             in
                 ( False, newModel, Cmd.none )
 
@@ -75,9 +75,9 @@ findPlayer userName players =
         |> List.head
 
 
-setPlayer1 : User -> Maybe (List (Player (Entity {}))) -> Model -> Model
-setPlayer1 user players model =
-    if User.isPlayer user then
+trySetPlayer1 : User -> Maybe (List (Player (Entity {}))) -> Model -> Model
+trySetPlayer1 user players model =
+    if User.isPlayer user && model.player1 == Nothing then
         { model | player1 = Maybe.andThen (findPlayer (User.getName user)) players }
     else
         model
