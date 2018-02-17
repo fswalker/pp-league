@@ -53,6 +53,7 @@ init session =
         in
             ( playerModel session.user, getPlayersCmd )
     else
+        -- TODO fetch leagues for admin users
         ( emptyModel, Cmd.none )
 
 
@@ -138,7 +139,7 @@ viewPlayerDropdown labelText thisPlayer otherPlayer players =
     p [ class "control is-expanded has-icons-left" ]
         [ span [ class "select is-fullwidth" ]
             [ select []
-                (renderOptions players)
+                (renderOptions thisPlayer otherPlayer players)
             ]
         , span [ class "icon is-small is-left" ]
             [ i [ class "fa fa-user" ] [] ]
@@ -146,21 +147,32 @@ viewPlayerDropdown labelText thisPlayer otherPlayer players =
         |> fieldWrapper labelText
 
 
-renderOptions : Maybe (List (Player (Entity {}))) -> List (Html msg)
-renderOptions players =
-    option [ selected True ] [ text "Choose player..." ]
+renderOptions :
+    Maybe (Player (Entity {}))
+    -> Maybe (Player (Entity {}))
+    -> Maybe (List (Player (Entity {})))
+    -> List (Html msg)
+renderOptions thisPlayer otherPlayer players =
+    option [ selected (thisPlayer == Nothing) ] [ text "Choose player..." ]
         :: (players
                 |> Maybe.withDefault []
                 |> List.filter (\p -> p.id_ /= Nothing)
+                |> List.filter (\p -> p.id_ /= (Maybe.andThen .id_ otherPlayer))
                 |> List.sortBy .nick
-                |> List.map renderOption
+                |> List.map (renderOption thisPlayer)
            )
 
 
-renderOption : Player (Entity {}) -> Html msg
-renderOption { id_, nick } =
+renderOption : Maybe (Player (Entity {})) -> Player (Entity {}) -> Html msg
+renderOption thisPlayer { id_, nick } =
     Maybe.map
-        (\v -> option [ value v ] [ text nick ])
+        (\v ->
+            option
+                [ value v
+                , selected (Just v == (Maybe.andThen .id_ thisPlayer))
+                ]
+                [ text nick ]
+        )
         id_
         |> Maybe.withDefault (text "")
 
