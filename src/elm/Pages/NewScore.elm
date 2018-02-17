@@ -9,6 +9,7 @@ module Pages.NewScore
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 import Data.Entity as Entity exposing (Entity)
 import Data.Player as Player exposing (Player)
 import Data.User as User exposing (User)
@@ -26,6 +27,8 @@ type alias Model =
 
 type Msg
     = UpdatePlayers (Maybe (List (Player (Entity {}))))
+    | ChoosePlayer1 String
+    | ChoosePlayer2 String
 
 
 playerModel : User -> Model
@@ -68,6 +71,22 @@ update session msg model =
             in
                 ( False, newModel, Cmd.none )
 
+        ChoosePlayer1 pId ->
+            let
+                player =
+                    model.leaguePlayers
+                        |> Maybe.andThen (findPlayer (Just pId))
+            in
+                ( False, { model | player1 = player }, Cmd.none )
+
+        ChoosePlayer2 pId ->
+            let
+                player =
+                    model.leaguePlayers
+                        |> Maybe.andThen (findPlayer (Just pId))
+            in
+                ( False, { model | player2 = player }, Cmd.none )
+
 
 findPlayer : Maybe String -> List (Player (Entity {})) -> Maybe (Player (Entity {}))
 findPlayer userName players =
@@ -91,9 +110,9 @@ view session model =
             [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Result" ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
-                    [ viewPlayerDropdown "Player 1" model.player1 model.player2 model.leaguePlayers ]
+                    [ viewPlayerDropdown "Player 1" ChoosePlayer1 model.player1 model.player2 model.leaguePlayers ]
                 , div [ class "column" ]
-                    [ viewPlayerDropdown "Player 2" model.player2 model.player1 model.leaguePlayers ]
+                    [ viewPlayerDropdown "Player 2" ChoosePlayer2 model.player2 model.player1 model.leaguePlayers ]
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
@@ -131,14 +150,15 @@ fieldWrapper labelText control =
 
 viewPlayerDropdown :
     String
+    -> (String -> Msg)
     -> Maybe (Player (Entity {}))
     -> Maybe (Player (Entity {}))
     -> Maybe (List (Player (Entity {})))
-    -> Html msg
-viewPlayerDropdown labelText thisPlayer otherPlayer players =
+    -> Html Msg
+viewPlayerDropdown labelText msg thisPlayer otherPlayer players =
     p [ class "control is-expanded has-icons-left" ]
         [ span [ class "select is-fullwidth" ]
-            [ select []
+            [ select [ onInput msg ]
                 (renderOptions thisPlayer otherPlayer players)
             ]
         , span [ class "icon is-small is-left" ]
@@ -153,7 +173,7 @@ renderOptions :
     -> Maybe (List (Player (Entity {})))
     -> List (Html msg)
 renderOptions thisPlayer otherPlayer players =
-    option [ selected (thisPlayer == Nothing) ] [ text "Choose player..." ]
+    option [ selected (thisPlayer == Nothing), value "" ] [ text "Choose player..." ]
         :: (players
                 |> Maybe.withDefault []
                 |> List.filter (\p -> p.id_ /= Nothing)
