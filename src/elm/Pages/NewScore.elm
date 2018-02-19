@@ -25,6 +25,11 @@ type alias Model =
     }
 
 
+type FormPlayer
+    = Player1
+    | Player2
+
+
 type Msg
     = UpdatePlayers (Maybe (List (Player (Entity {}))))
     | ChoosePlayer1 String
@@ -47,17 +52,15 @@ emptyModel =
 
 init : Session -> ( Model, Cmd msg )
 init session =
-    if User.isPlayer session.user then
-        let
-            getPlayersCmd =
-                User.getLeagueId session.user
-                    |> Maybe.map Storage.getLeaguePlayers
-                    |> Maybe.withDefault Cmd.none
-        in
-            ( playerModel session.user, getPlayersCmd )
-    else
-        -- TODO fetch leagues for admin users
-        ( emptyModel, Cmd.none )
+    -- TODO allow admins choose league
+    let
+        getPlayersCmd =
+            User.getLeagueId session.user
+                |> Maybe.map Storage.getLeaguePlayers
+                |> Maybe.withDefault Cmd.none
+    in
+        -- TODO set current session user as author
+        ( playerModel session.user, getPlayersCmd )
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
@@ -110,9 +113,9 @@ view session model =
             [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Result" ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
-                    [ viewPlayerDropdown "Player 1" ChoosePlayer1 model.player1 model.player2 model.leaguePlayers ]
+                    [ viewPlayerDropdown session.user model Player1 ChoosePlayer1 ]
                 , div [ class "column" ]
-                    [ viewPlayerDropdown "Player 2" ChoosePlayer2 model.player2 model.player1 model.leaguePlayers ]
+                    [ viewPlayerDropdown session.user model Player2 ChoosePlayer2 ]
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
@@ -149,22 +152,34 @@ fieldWrapper labelText control =
 
 
 viewPlayerDropdown :
-    String
+    User
+    -> Model
+    -> FormPlayer
     -> (String -> Msg)
-    -> Maybe (Player (Entity {}))
-    -> Maybe (Player (Entity {}))
-    -> Maybe (List (Player (Entity {})))
     -> Html Msg
-viewPlayerDropdown labelText msg thisPlayer otherPlayer players =
-    p [ class "control is-expanded has-icons-left" ]
-        [ span [ class "select is-fullwidth" ]
-            [ select [ onInput msg ]
-                (renderOptions thisPlayer otherPlayer players)
+viewPlayerDropdown user model player msg =
+    let
+        ( labelText, thisPlayer, otherPlayer ) =
+            if player == Player1 then
+                ( "Player 1", model.player1, model.player2 )
+            else
+                ( "Player 2", model.player2, model.player1 )
+
+        players =
+            model.leaguePlayers
+
+        isDisabled =
+            player == Player1 && User.isPlayer user
+    in
+        p [ class "control is-expanded has-icons-left" ]
+            [ span [ class "select is-fullwidth" ]
+                [ select [ onInput msg, disabled isDisabled ]
+                    (renderOptions thisPlayer otherPlayer players)
+                ]
+            , span [ class "icon is-small is-left" ]
+                [ i [ class "fa fa-user" ] [] ]
             ]
-        , span [ class "icon is-small is-left" ]
-            [ i [ class "fa fa-user" ] [] ]
-        ]
-        |> fieldWrapper labelText
+            |> fieldWrapper labelText
 
 
 renderOptions :
