@@ -22,6 +22,7 @@ type alias Model =
     , leaguePlayers : Maybe (List (Player (Entity {})))
     , player1 : Maybe (Player (Entity {}))
     , player2 : Maybe (Player (Entity {}))
+    , author : Maybe String
     }
 
 
@@ -38,7 +39,14 @@ type Msg
 
 playerModel : User -> Model
 playerModel user =
-    { emptyModel | leagueId = User.getLeagueId user }
+    let
+        author =
+            User.getName user
+    in
+        { emptyModel
+            | leagueId = User.getLeagueId user
+            , author = author
+        }
 
 
 emptyModel : Model
@@ -47,6 +55,7 @@ emptyModel =
     , leaguePlayers = Nothing
     , player1 = Nothing
     , player2 = Nothing
+    , author = Nothing
     }
 
 
