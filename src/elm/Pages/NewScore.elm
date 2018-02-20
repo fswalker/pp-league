@@ -11,6 +11,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import Date exposing (Date)
+import Date.Extra exposing (toFormattedString)
 import Task
 import Data.Entity as Entity exposing (Entity)
 import Data.Player as Player exposing (Player)
@@ -142,7 +143,7 @@ view : Session -> Model -> Html Msg
 view session model =
     div [ class "new-score-form columns is-centered" ]
         [ div [ class "column is-half-desktop is-two-thirds-tablet has-text-centered is-size-5" ]
-            [ h3 [ class "new-score-form-title is-size-3" ] [ text "Match Result" ]
+            [ h3 [ class "new-score-form-title is-size-3" ] [ text "Game Result" ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
                     [ viewPlayerDropdown session.user model Player1 ChoosePlayer1 ]
@@ -157,9 +158,9 @@ view session model =
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
-                    [ text "Date" ]
+                    [ verticalFieldWrapper "Date" (text "") ]
                 , div [ class "column" ]
-                    []
+                    [ displayDate model.date ]
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
@@ -168,6 +169,7 @@ view session model =
                         , div [ class "level-right" ]
                             [ button
                                 [ class "button level-item is-success"
+                                , title "Add New Score button"
                                 , disabled <| not <| isModelValid model
                                 ]
                                 [ text "Add" ]
@@ -179,9 +181,19 @@ view session model =
         ]
 
 
-fieldWrapper : String -> Html msg -> Html msg
-fieldWrapper labelText control =
-    div [ class "field" ]
+horizontalFieldWrapper : String -> Html msg -> Html msg
+horizontalFieldWrapper =
+    fieldWrapper True
+
+
+verticalFieldWrapper : String -> Html msg -> Html msg
+verticalFieldWrapper =
+    fieldWrapper False
+
+
+fieldWrapper : Bool -> String -> Html msg -> Html msg
+fieldWrapper isHorizontal labelText control =
+    div [ classList [ ( "field", True ), ( "is-horizontal", isHorizontal ) ] ]
         [ label [ class "label" ] [ text labelText ]
         , control
         ]
@@ -215,7 +227,7 @@ viewPlayerDropdown user model player msg =
             , span [ class "icon is-small is-left" ]
                 [ i [ class "fa fa-user" ] [] ]
             ]
-            |> fieldWrapper labelText
+            |> verticalFieldWrapper labelText
 
 
 renderOptions :
@@ -268,7 +280,17 @@ viewScoreInput labelText updateAction score =
         , span [ class "icon is-small is-left" ]
             [ i [ class "fa fa-trophy" ] [] ]
         ]
-        |> fieldWrapper labelText
+        |> verticalFieldWrapper labelText
+
+
+displayDate : Maybe Date -> Html msg
+displayDate date =
+    date
+        |> Maybe.map (toFormattedString "dd-MM-yyyy")
+        |> Maybe.withDefault "Loading date..."
+        |> text
+        |> List.singleton
+        |> span [ class "is-size-6" ]
 
 
 scoresAreValid : Model -> Bool
