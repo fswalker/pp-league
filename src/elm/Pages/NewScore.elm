@@ -22,6 +22,8 @@ type alias Model =
     , leaguePlayers : Maybe (List (Player (Entity {})))
     , player1 : Maybe (Player (Entity {}))
     , player2 : Maybe (Player (Entity {}))
+    , score1 : Int
+    , score2 : Int
     , author : Maybe String
     }
 
@@ -35,6 +37,8 @@ type Msg
     = UpdatePlayers (Maybe (List (Player (Entity {}))))
     | ChoosePlayer1 String
     | ChoosePlayer2 String
+    | UpdateScore1 Int
+    | UpdateScore2 Int
 
 
 playerModel : User -> Model
@@ -55,6 +59,8 @@ emptyModel =
     , leaguePlayers = Nothing
     , player1 = Nothing
     , player2 = Nothing
+    , score1 = 0
+    , score2 = 0
     , author = Nothing
     }
 
@@ -99,6 +105,11 @@ update session msg model =
             in
                 ( False, { model | player2 = player }, Cmd.none )
 
+        UpdateScore1 score ->
+            ( False, { model | score1 = score }, Cmd.none )
+
+        UpdateScore2 score ->
+            ( False, { model | score2 = score }, Cmd.none )
 
 findPlayer : Maybe String -> List (Player (Entity {})) -> Maybe (Player (Entity {}))
 findPlayer userName players =
@@ -128,9 +139,9 @@ view session model =
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
-                    [ viewScoreInput "Score 1" ]
+                    [ viewScoreInput "Score 1" UpdateScore1 model.score1 ]
                 , div [ class "column" ]
-                    [ viewScoreInput "Score 2" ]
+                    [ viewScoreInput "Score 2" UpdateScore2 model.score2 ]
                 ]
             , div [ class "columns is-mobile" ]
                 [ div [ class "column" ]
@@ -221,15 +232,21 @@ renderOption thisPlayer { id_, nick } =
         |> Maybe.withDefault (text "")
 
 
-viewScoreInput : String -> Html msg
-viewScoreInput labelText =
+parseScore : String -> Int
+parseScore =
+    String.toInt >> (Result.withDefault 0)
+
+
+viewScoreInput : String -> (Int -> Msg) -> Int -> Html Msg
+viewScoreInput labelText updateAction score =
     div [ class "control is-expaned has-icons-left" ]
         [ input
             [ class "input"
             , type_ "number"
-            , value "0"
+            , value <| toString score
             , Html.Attributes.min "0"
             , Html.Attributes.max "3"
+            , onInput (parseScore >> updateAction)
             ]
             []
         , span [ class "icon is-small is-left" ]
