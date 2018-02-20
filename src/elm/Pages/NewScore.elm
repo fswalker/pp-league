@@ -10,6 +10,8 @@ module Pages.NewScore
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Date exposing (Date)
+import Task
 import Data.Entity as Entity exposing (Entity)
 import Data.Player as Player exposing (Player)
 import Data.User as User exposing (User)
@@ -25,6 +27,7 @@ type alias Model =
     , score1 : Int
     , score2 : Int
     , author : Maybe String
+    , date : Maybe Date
     }
 
 
@@ -37,6 +40,7 @@ type Msg
     = UpdatePlayers (Maybe (List (Player (Entity {}))))
     | ChoosePlayer1 String
     | ChoosePlayer2 String
+    | UpdateDate Date
     | UpdateScore1 Int
     | UpdateScore2 Int
 
@@ -62,10 +66,11 @@ emptyModel =
     , score1 = 0
     , score2 = 0
     , author = Nothing
+    , date = Nothing
     }
 
 
-init : Session -> ( Model, Cmd msg )
+init : Session -> ( Model, Cmd Msg )
 init session =
     -- TODO allow admins choose league
     let
@@ -73,9 +78,12 @@ init session =
             User.getLeagueId session.user
                 |> Maybe.map Storage.getLeaguePlayers
                 |> Maybe.withDefault Cmd.none
+
+        getDateCmd =
+            Task.perform UpdateDate Date.now
     in
         -- TODO set current session user as author
-        ( playerModel session.user, getPlayersCmd )
+        playerModel session.user ! [ getPlayersCmd, getDateCmd ]
 
 
 update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
@@ -110,6 +118,10 @@ update session msg model =
 
         UpdateScore2 score ->
             ( False, { model | score2 = score }, Cmd.none )
+
+        UpdateDate date ->
+            ( False, { model | date = Just date }, Cmd.none )
+
 
 findPlayer : Maybe String -> List (Player (Entity {})) -> Maybe (Player (Entity {}))
 findPlayer userName players =
