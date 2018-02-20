@@ -166,7 +166,11 @@ view session model =
                     [ div [ class "level" ]
                         [ div [ class "level-left" ] []
                         , div [ class "level-right" ]
-                            [ button [ class "button level-item is-success" ] [ text "Add" ]
+                            [ button
+                                [ class "button level-item is-success"
+                                , disabled <| not <| isModelValid model
+                                ]
+                                [ text "Add" ]
                             ]
                         ]
                     ]
@@ -265,3 +269,26 @@ viewScoreInput labelText updateAction score =
             [ i [ class "fa fa-trophy" ] [] ]
         ]
         |> fieldWrapper labelText
+
+
+scoresAreValid : Model -> Bool
+scoresAreValid model =
+    (model.score1 >= 0 && model.score2 >= 0)
+        && (model.score1 == 3 || model.score2 == 3)
+        && (model.score1 /= model.score2)
+
+
+playersAreValid : Model -> Bool
+playersAreValid model =
+    (model.player1 /= Nothing)
+        && (model.player2 /= Nothing)
+        && (model.player1 /= model.player2)
+
+
+isModelValid : Model -> Bool
+isModelValid model =
+    (model.author /= Nothing)
+        && (model.date /= Nothing)
+        && (model.leagueId /= Nothing)
+        && (scoresAreValid model)
+        && (playersAreValid model)
