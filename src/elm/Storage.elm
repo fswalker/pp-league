@@ -13,6 +13,7 @@ port module Storage
         , getLeague
         , updateLeague
         , addNewScore
+        , newScoreAdded
         )
 
 import Json.Decode exposing (Value)
@@ -60,7 +61,7 @@ port updateLeague : (Value -> msg) -> Sub msg
 
 
 port addNewScore :
-    { authorId : String
+    { author : String
     , player1 : String
     , player2 : String
     , score1 : Int
@@ -71,3 +72,6 @@ port addNewScore :
     , id_ : String
     }
     -> Cmd msg
+
+
+port newScoreAdded : (Value -> msg) -> Sub msg

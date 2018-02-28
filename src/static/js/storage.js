@@ -28,7 +28,7 @@ export class Storage {
 
     _createActiveRoundIndex() {
         return this._createIndex({
-            fields: [ 'type', 'active' ],
+            fields: ['type', 'active'],
             name: 'indexTypeActive',
             ddoc: 'index_type_active'
         });
@@ -36,7 +36,7 @@ export class Storage {
 
     _createLeagueRoundIndex() {
         return this._createIndex({
-            fields: [ 'type', 'league_id', 'round_id' ],
+            fields: ['type', 'league_id', 'round_id'],
             name: 'indexTypeLeagueRound',
             ddoc: 'index_type_league_round'
         });
@@ -44,7 +44,7 @@ export class Storage {
 
     _createLeaguePlayersIndex() {
         return this._createIndex({
-            fields: [ 'type', 'league_id' ],
+            fields: ['type', 'league_id'],
             name: 'indexTypeLeague',
             ddoc: 'index_type_league'
         });
@@ -93,11 +93,11 @@ export class Storage {
                     _id: user && user.name
                 }
             })
-            .then(result => {
-                const details = this._getSingleDoc(result);
-                console.log('_getUserDetails result', details);
-                return this._mergeUser(user, details);
-            });
+                .then(result => {
+                    const details = this._getSingleDoc(result);
+                    console.log('_getUserDetails result', details);
+                    return this._mergeUser(user, details);
+                });
         }
         else {
             return user;
@@ -109,8 +109,8 @@ export class Storage {
         return this.local.find({
             selector: {
                 type: 'player'
-              }
-            })
+            }
+        })
             .then(successFn)
             .catch(failureFn);
     }
@@ -121,8 +121,8 @@ export class Storage {
             selector: {
                 type: 'player',
                 league_id: league_id
-              }
-            })
+            }
+        })
             .then(successFn)
             .catch(failureFn);
     }
@@ -133,11 +133,11 @@ export class Storage {
             selector: {
                 type: 'round',
                 active: true
-              }
+            }
         }).then(r => {
             successFn(getSingleDoc(r));
         })
-          .catch(failureFn);
+            .catch(failureFn);
     }
 
     getScores(league_id, round_id, successFn, failureFn) {
@@ -147,8 +147,8 @@ export class Storage {
                 type: 'score',
                 league_id: league_id,
                 round_id: round_id
-              }
-            })
+            }
+        })
             .then(successFn)
             .catch(failureFn);
     }
@@ -157,9 +157,19 @@ export class Storage {
         console.log('getLeague', league_id, this, successFn, failureFn);
         return this.local.find({
             selector: {
-               _id: league_id
-              }
-            })
+                _id: league_id
+            }
+        })
+            .then(successFn)
+            .catch(failureFn);
+    }
+
+    addNewScore(score, successFn, failureFn) {
+        score.type = 'score';
+        score._id = score.id_;
+        delete score.id_;
+        console.log('addNewScore', score, this, successFn, failureFn);
+        return this.local.put(score)
             .then(successFn)
             .catch(failureFn);
     }

@@ -112,14 +112,15 @@ export class WebappPorts {
 
     initAddNewScore() {
         const okHandler = (response) => {
-            console.log('AddNewScore', response, this);
+            console.log('AddNewScore::ok', response, this);
+            this.app.ports.newScoreAdded.send(response);
         };
         const errHandler = (err) => {
-            console.error('AddNewScore error', err);
-            // call port - abort?? retry?
+            console.error('AddNewScore::error', err);
+            this.app.ports.newScoreAdded.send(err);
         };
-        this.app.ports.addNewScore.subscribe((newScore) => {
-            console.log('addNewScore', newScore);
+        this.app.ports.addNewScore.subscribe(newScore => {
+            this.storage.addNewScore(newScore, okHandler, errHandler);
         });
     }
 

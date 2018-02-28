@@ -18,6 +18,7 @@ import Data.Player as Player exposing (Player)
 import Data.User as User exposing (User)
 import Session as Session exposing (Session)
 import Storage
+import Route
 
 
 type alias Model =
@@ -45,6 +46,7 @@ type Msg
     | UpdateScore1 Int
     | UpdateScore2 Int
     | AddNewScore Model
+    | NewScoreAdded
 
 
 playerModel : User -> Model
@@ -141,13 +143,16 @@ update session msg model =
                     ( _, _ ) ->
                         ( False, model, Cmd.none )
 
+        NewScoreAdded ->
+            ( True, model, Route.navigateTo Route.Home )
+
 
 getNewScore :
     String
     -> String
     -> Model
     ->
-        { authorId : String
+        { author : String
         , player1 : String
         , player2 : String
         , score1 : Int
@@ -168,7 +173,7 @@ getNewScore authorId roundId model =
         player2 =
             getPlayerId model.player2
     in
-        { authorId = authorId
+        { author = authorId
         , player1 = player1
         , player2 = player2
         , score1 = model.score1

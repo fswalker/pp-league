@@ -254,6 +254,7 @@ subscriptions =
                 , Storage.updateActiveRound (decodeRound >> Session.UpdateRound >> SessionMsg)
                 , Storage.updateLeaguePlayers (decodePlayers >> UpdateLeaguePlayers)
                 , Storage.updateScores (decodeScores >> Home.UpdateScores >> HomeMsg)
+                , Storage.newScoreAdded (\_ -> (NewScore.NewScoreAdded |> NewScoreMsg))
                 ]
 
 
