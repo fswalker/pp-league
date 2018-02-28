@@ -9,9 +9,9 @@ module Pages.NewScore
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 import Date exposing (Date)
-import Date.Extra exposing (toFormattedString)
+import Date.Extra exposing (toFormattedString, toUtcIsoString)
 import Task
 import Data.Entity as Entity exposing (Entity)
 import Data.Player as Player exposing (Player)
@@ -44,6 +44,7 @@ type Msg
     | UpdateDate Date
     | UpdateScore1 Int
     | UpdateScore2 Int
+    | AddNewScore Model
 
 
 playerModel : User -> Model
@@ -123,6 +124,57 @@ update session msg model =
         UpdateDate date ->
             ( False, { model | date = Just date }, Cmd.none )
 
+        AddNewScore _ ->
+            let
+                roundId =
+                    Session.getRoundId session
+
+                authorId =
+                    User.getName session.user
+            in
+                case ( roundId, authorId ) of
+                    ( Just rid, Just aid ) ->
+                        getNewScore aid rid model
+                            |> Storage.addNewScore
+                            |> (,,) True model
+
+                    ( _, _ ) ->
+                        ( False, model, Cmd.none )
+
+
+getNewScore :
+    String
+    -> String
+    -> Model
+    ->
+        { authorId : String
+        , score :
+            { player1 : String
+            , player2 : String
+            , score1 : Int
+            , score2 : Int
+            , date : String
+            , league_id : String
+            , round_id : String
+            }
+        }
+getNewScore authorId roundId model =
+    let
+        getPlayerId =
+            (Maybe.map .id_) >> Maybe.andThen (\x -> x) >> Maybe.withDefault ""
+    in
+        { authorId = authorId
+        , score =
+            { player1 = getPlayerId model.player1
+            , player2 = getPlayerId model.player2
+            , score1 = model.score1
+            , score2 = model.score2
+            , date = model.date |> Maybe.map toUtcIsoString |> Maybe.withDefault ""
+            , league_id = model.leagueId |> Maybe.withDefault ""
+            , round_id = roundId
+            }
+        }
+
 
 findPlayer : Maybe String -> List (Player (Entity {})) -> Maybe (Player (Entity {}))
 findPlayer userName players =
@@ -171,6 +223,7 @@ view session model =
                                 [ class "button level-item is-success"
                                 , title "Add New Score button"
                                 , disabled <| not <| isModelValid model
+                                , onClick (AddNewScore model)
                                 ]
                                 [ text "Add" ]
                             ]
@@ -283,11 +336,16 @@ viewScoreInput labelText updateAction score =
         |> verticalFieldWrapper labelText
 
 
-displayDate : Maybe Date -> Html msg
-displayDate date =
+getFormattedDateString : String -> Maybe Date -> String
+getFormattedDateString defaultStr date =
     date
         |> Maybe.map (toFormattedString "dd-MM-yyyy")
-        |> Maybe.withDefault "Loading date..."
+        |> Maybe.withDefault defaultStr
+
+
+displayDate : Maybe Date -> Html msg
+displayDate date =
+    getFormattedDateString "Loading date..." date
         |> text
         |> List.singleton
         |> span [ class "is-size-6" ]

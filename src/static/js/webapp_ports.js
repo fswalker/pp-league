@@ -81,8 +81,8 @@ export class WebappPorts {
         const okHandler = (response) => {
             console.log('GetLeague', response, this);
             this.app.ports.updateLeague.send(
-                response 
-                && response.docs 
+                response
+                && response.docs
                 && response.docs.length > 0
                 && response.docs[0]
             );
@@ -110,14 +110,28 @@ export class WebappPorts {
         });
     }
 
+    initAddNewScore() {
+        const okHandler = (response) => {
+            console.log('AddNewScore', response, this);
+        };
+        const errHandler = (err) => {
+            console.error('AddNewScore error', err);
+            // call port - abort?? retry?
+        };
+        this.app.ports.addNewScore.subscribe((newScore) => {
+            console.log('addNewScore', newScore);
+        });
+    }
+
     init() {
-        this.initLogIn();        
+        this.initLogIn();
         this.initLogOut();
-        this.initGetSession();        
+        this.initGetSession();
         this.initGetActiveRound();
         this.initGetLeague();
         this.initGetLeaguePlayers();
         this.initGetScores();
+        this.initAddNewScore();
     }
 
 }

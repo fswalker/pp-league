@@ -9,7 +9,6 @@ module Pages.Home
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Dict exposing (Dict, fromList)
 import Data.Entity exposing (Entity, Id)
 import Data.Round exposing (Round)

@@ -4,6 +4,7 @@ module Session
         , Msg(..)
         , init
         , update
+        , getRoundId
         )
 
 import Route exposing (Route)
@@ -103,3 +104,16 @@ update msg session =
                     { session | activeRound = Ready mr }
             in
                 ( newSession, getRouteHomeCmd session newSession )
+
+
+getRoundId : Session -> Maybe String
+getRoundId { activeRound } =
+    case activeRound of
+        NotStarted ->
+            Nothing
+
+        Loading ->
+            Nothing
+
+        Ready v ->
+            Maybe.andThen .id_ v
