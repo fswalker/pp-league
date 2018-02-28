@@ -8,25 +8,27 @@ import Route as Route exposing (Route(..))
 
 view : User -> Html msg
 view user =
-    nav
-        [ class "navbar is-transparent main"
-        , attribute "role" "navigation"
-        , attribute "aria-label" "main navigation"
-        ]
-        [ div [ class "navbar-brand" ]
-            [ div [ class "button navbar-burger burger", attribute "data-target" "pp-navbar-menu" ]
-                [ span [] []
-                , span [] []
-                , span [] []
+    let
+        isUserAuthenticated =
+            not <| User.isAnonymous user
+    in
+        nav
+            [ class "navbar is-transparent main"
+            , classList [ ( "login-view", not isUserAuthenticated ) ]
+            , attribute "role" "navigation"
+            , attribute "aria-label" "main navigation"
+            ]
+            [ div [ class "navbar-brand" ]
+                [ div [ class "button navbar-burger burger", attribute "data-target" "pp-navbar-menu" ]
+                    [ span [] []
+                    , span [] []
+                    , span [] []
+                    ]
+                ]
+            , div [ class "navbar-menu", id "pp-navbar-menu" ]
+                [ isUserAuthenticated |> renderNavItems
                 ]
             ]
-        , div [ class "navbar-menu", id "pp-navbar-menu" ]
-            [ user
-                |> User.isAnonymous
-                |> not
-                |> renderNavItems
-            ]
-        ]
 
 
 renderNavItems : Bool -> Html msg
