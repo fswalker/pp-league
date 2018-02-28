@@ -39,7 +39,7 @@ init =
 fetchDataForUser : Session -> ( Session, Cmd msg )
 fetchDataForUser session =
     if session.user == Anonymous then
-        ( session, Route.newUrl Route.Login )
+        ( session, Route.navigateTo Route.Login )
     else
         { session
             | league = Loading
@@ -72,10 +72,10 @@ getRouteHomeCmd : Session -> Session -> Cmd msg
 getRouteHomeCmd oldSession { league, activeRound } =
     case ( oldSession.league, league, oldSession.activeRound, activeRound ) of
         ( Loading, Ready _, Ready _, Ready _ ) ->
-            Route.newUrl Route.Home
+            Route.navigateTo Route.Home
 
         ( Ready _, Ready _, Loading, Ready _ ) ->
-            Route.newUrl Route.Home
+            Route.navigateTo Route.Home
 
         _ ->
             Cmd.none

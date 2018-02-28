@@ -2,7 +2,7 @@ module Route
     exposing
         ( Route(..)
         , fromLocation
-        , newUrl
+        , navigateTo
         , href
         )
 
@@ -54,8 +54,8 @@ fromLocation location =
         parseHash route location
 
 
-newUrl : Route -> Cmd msg
-newUrl =
+navigateTo : Route -> Cmd msg
+navigateTo =
     toStr >> Navigation.newUrl
 
 

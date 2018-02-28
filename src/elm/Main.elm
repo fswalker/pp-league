@@ -80,7 +80,7 @@ setRoute route model =
 
             Just Route.Login ->
                 if isAuthenticated model.session.user then
-                    ( model, Route.newUrl Route.Home )
+                    ( model, Route.navigateTo Route.Home )
                 else
                     { model
                         | page = Login (Login.init)
@@ -108,7 +108,7 @@ setRoute route model =
                         }
                             ! [ homeCmds |> Cmd.map HomeMsg ]
                 else
-                    model ! [ Route.newUrl Route.Login ]
+                    model ! [ Route.navigateTo Route.Login ]
 
             Just Route.NewScore ->
                 if isAuthenticated model.session.user then
@@ -122,7 +122,7 @@ setRoute route model =
                         }
                             ! [ scoreCmds |> Cmd.map NewScoreMsg ]
                 else
-                    model ! [ Route.newUrl Route.Login ]
+                    model ! [ Route.navigateTo Route.Login ]
 
 
 isAuthenticated : User -> Bool
