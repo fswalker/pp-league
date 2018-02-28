@@ -61,14 +61,13 @@ port updateLeague : (Value -> msg) -> Sub msg
 
 port addNewScore :
     { authorId : String
-    , score :
-        { player1 : String
-        , player2 : String
-        , score1 : Int
-        , score2 : Int
-        , date : String
-        , league_id : String
-        , round_id : String
-        }
+    , player1 : String
+    , player2 : String
+    , score1 : Int
+    , score2 : Int
+    , date : String
+    , league_id : String
+    , round_id : String
+    , id_ : String
     }
     -> Cmd msg

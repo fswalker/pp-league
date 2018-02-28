@@ -148,32 +148,44 @@ getNewScore :
     -> Model
     ->
         { authorId : String
-        , score :
-            { player1 : String
-            , player2 : String
-            , score1 : Int
-            , score2 : Int
-            , date : String
-            , league_id : String
-            , round_id : String
-            }
+        , player1 : String
+        , player2 : String
+        , score1 : Int
+        , score2 : Int
+        , date : String
+        , league_id : String
+        , round_id : String
+        , id_ : String
         }
 getNewScore authorId roundId model =
     let
         getPlayerId =
             (Maybe.map .id_) >> Maybe.andThen (\x -> x) >> Maybe.withDefault ""
+
+        player1 =
+            getPlayerId model.player1
+
+        player2 =
+            getPlayerId model.player2
     in
         { authorId = authorId
-        , score =
-            { player1 = getPlayerId model.player1
-            , player2 = getPlayerId model.player2
-            , score1 = model.score1
-            , score2 = model.score2
-            , date = model.date |> Maybe.map toUtcIsoString |> Maybe.withDefault ""
-            , league_id = model.leagueId |> Maybe.withDefault ""
-            , round_id = roundId
-            }
+        , player1 = player1
+        , player2 = player2
+        , score1 = model.score1
+        , score2 = model.score2
+        , date = model.date |> Maybe.map toUtcIsoString |> Maybe.withDefault ""
+        , league_id = model.leagueId |> Maybe.withDefault ""
+        , round_id = roundId
+        , id_ = createNewScoreId roundId player1 player2
         }
+
+
+createNewScoreId : String -> String -> String -> String
+createNewScoreId roundId player1Id player2Id =
+    if player1Id <= player2Id then
+        roundId ++ "_" ++ player1Id ++ "_" ++ player2Id
+    else
+        roundId ++ "_" ++ player2Id ++ "_" ++ player1Id
 
 
 findPlayer : Maybe String -> List (Player (Entity {})) -> Maybe (Player (Entity {}))
