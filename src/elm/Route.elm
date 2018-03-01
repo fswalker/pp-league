@@ -17,6 +17,7 @@ type Route
     | Login
     | Logout
     | NewScore
+    | Round
 
 
 route : Parser (Route -> a) a
@@ -26,6 +27,7 @@ route =
         , map Login (s "login")
         , map Logout (s "logout")
         , map NewScore (s "newScore")
+        , map Round (s "round")
         ]
 
 
@@ -44,6 +46,9 @@ toStr route =
 
             NewScore ->
                 "newScore"
+
+            Round ->
+                "round"
 
 
 fromLocation : Location -> Maybe Route

@@ -16,6 +16,7 @@ import Views.Page as Page
 import Pages.Login as Login
 import Pages.Home as Home
 import Pages.NewScore as NewScore
+import Pages.Round
 
 
 type Page
@@ -23,6 +24,7 @@ type Page
     | Login Login.Model
     | Home Home.Model
     | NewScore NewScore.Model
+    | RoundPage Pages.Round.Model
 
 
 
@@ -61,6 +63,7 @@ type Msg
     | UpdateLeaguePlayers (Maybe (List (Player (Entity {}))))
     | HomeMsg Home.Msg
     | NewScoreMsg NewScore.Msg
+    | RoundMsg Pages.Round.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -121,6 +124,20 @@ setRoute route model =
                             , isLoading = True
                         }
                             ! [ scoreCmds |> Cmd.map NewScoreMsg ]
+                else
+                    model ! [ Route.navigateTo Route.Login ]
+
+            Just Route.Round ->
+                if isAuthenticated model.session.user then
+                    let
+                        ( roundModel, roundCmds ) =
+                            Pages.Round.init model.session
+                    in
+                        { model
+                            | page = RoundPage roundModel
+                            , isLoading = True
+                        }
+                            ! [ roundCmds |> Cmd.map RoundMsg ]
                 else
                     model ! [ Route.navigateTo Route.Login ]
 
@@ -221,6 +238,11 @@ viewPage session page isLoading =
             NewScore model ->
                 NewScore.view session model
                     |> Html.map NewScoreMsg
+                    |> frame
+
+            RoundPage model ->
+                Pages.Round.view session model
+                    |> Html.map RoundMsg
                     |> frame
 
 
