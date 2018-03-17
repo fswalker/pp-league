@@ -154,6 +154,17 @@ export class Storage {
             .catch(failureFn);
     }
 
+    getAllLeagues(successFn, failureFn) {
+        console.log('getAllLeagues', this, successFn, failureFn);
+        return this.local.find({
+            selector: {
+                type: 'league'
+            }
+        })
+            .then(successFn)
+            .catch(failureFn);
+    }
+
     addNewScore(score, successFn, failureFn) {
         score.type = 'score';
         score._id = score.id_;

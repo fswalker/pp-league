@@ -12,6 +12,8 @@ port module Storage
         , updateScores
         , getLeague
         , updateLeague
+        , getAllLeagues
+        , updateAllLeagues
         , addNewScore
         , newScoreAdded
         )
@@ -58,6 +60,12 @@ port getLeague : String -> Cmd msg
 
 
 port updateLeague : (Value -> msg) -> Sub msg
+
+
+port getAllLeagues : () -> Cmd msg
+
+
+port updateAllLeagues : (Value -> msg) -> Sub msg
 
 
 port addNewScore :

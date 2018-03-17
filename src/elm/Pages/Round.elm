@@ -1,26 +1,47 @@
 module Pages.Round
     exposing
         ( Model
-        , Msg
+        , Msg(..)
         , init
         , view
+        , update
         )
 
 import Html exposing (..)
 import Session as Session exposing (Session)
+import Data.League exposing (League)
+import Storage
 
 
 type alias Model =
-    ()
+    { leagues : Maybe (List (League {})) }
 
 
-type alias Msg =
-    ()
+type Msg
+    = UpdateAllLeagues (Maybe (List (League {})))
+
+
+initialModel : Model
+initialModel =
+    { leagues = Nothing }
 
 
 init : Session -> ( Model, Cmd msg )
 init session =
-    ( (), Cmd.none )
+    ( initialModel, Storage.getAllLeagues () )
+
+
+update : Session -> Msg -> Model -> ( Bool, Model, Cmd Msg )
+update session msg model =
+    case msg of
+        UpdateAllLeagues mLeagues ->
+            let
+                newModel =
+                    { model
+                        | leagues = mLeagues
+                    }
+            in
+                ( True, newModel, Cmd.none )
 
 
 view : Session -> Model -> Html Msg

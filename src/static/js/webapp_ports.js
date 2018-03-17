@@ -96,6 +96,22 @@ export class WebappPorts {
         });
     }
 
+    initGetAllLeagues() {
+        const okHandler = (response) => {
+            console.log('GetAllLeagues', response, this);
+            this.app.ports.updateAllLeagues.send(
+                response && response.docs
+            );
+        };
+        const errHandler = (err) => {
+            console.error('GetAllLeagues error', err);
+            // call port - abort?? retry?
+        };
+        this.app.ports.getAllLeagues.subscribe(() => {
+            this.storage.getAllLeagues(okHandler, errHandler);
+        });
+    }
+
     initGetScores() {
         const okHandler = (response) => {
             console.log('GetScores', response, this);
@@ -133,6 +149,7 @@ export class WebappPorts {
         this.initGetLeaguePlayers();
         this.initGetScores();
         this.initAddNewScore();
+        this.initGetAllLeagues();
     }
 
 }

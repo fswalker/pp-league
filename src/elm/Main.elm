@@ -193,6 +193,9 @@ update msg model =
         ( UpdateLeaguePlayers players, NewScore scoreModel ) ->
             handleNewScoreMsg model (NewScore.UpdatePlayers players) scoreModel
 
+        ( RoundMsg msg, RoundPage roundModel ) ->
+            handleRoundMsg model msg roundModel
+
         ( s, m ) ->
             -- TODO create handler for each msg type - put case for model inside - the most safety
             Debug.crash <| "TODO Main" ++ toString s ++ " " ++ toString m
@@ -268,6 +271,10 @@ subscriptions =
         decodeScores =
             Decode.decodeValue scoresListDecoder
                 >> Result.toMaybe
+
+        decodeAllLeagues =
+            Decode.decodeValue (Decode.list leagueDecoder)
+                >> Result.toMaybe
     in
         \_ ->
             Sub.batch
@@ -277,6 +284,7 @@ subscriptions =
                 , Storage.updateLeaguePlayers (decodePlayers >> UpdateLeaguePlayers)
                 , Storage.updateScores (decodeScores >> Home.UpdateScores >> HomeMsg)
                 , Storage.newScoreAdded (\_ -> (NewScore.NewScoreAdded |> NewScoreMsg))
+                , Storage.updateAllLeagues (decodeAllLeagues >> Pages.Round.UpdateAllLeagues >> RoundMsg)
                 ]
 
 
@@ -314,3 +322,16 @@ handleNewScoreMsg mainModel message scoreModel =
             , isLoading = isLoading
         }
             ! [ Cmd.map NewScoreMsg newCmd ]
+
+
+handleRoundMsg : Model -> Pages.Round.Msg -> Pages.Round.Model -> ( Model, Cmd Msg )
+handleRoundMsg mainModel roundMessage roundModel =
+    let
+        ( isLoading, newRoundModel, newCmd ) =
+            Pages.Round.update mainModel.session roundMessage roundModel
+    in
+        { mainModel
+            | page = RoundPage newRoundModel
+            , isLoading = isLoading
+        }
+            ! [ Cmd.map RoundMsg newCmd ]
