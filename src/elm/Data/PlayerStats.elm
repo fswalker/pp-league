@@ -63,7 +63,8 @@ createScoresTable dict stats =
 
 recalculateScoresTableForUsers : List String -> List PlayerStats -> List PlayerStats
 recalculateScoresTableForUsers users stats =
-    List.map initPlayerStats users
+    users
+        |> List.map initPlayerStats
         |> createScoresTable (playersStats2Dict stats)
 
 
