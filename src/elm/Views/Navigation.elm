@@ -37,6 +37,7 @@ renderNavItems shouldRender =
         (if shouldRender then
             [ navItem Route.Home "My League" "Link to My League Page"
             , navItem Route.NewScore "New Score" "Link to New Score Page"
+            , navItem Route.Round "Round" "Link to current Round Page"
             ]
          else
             []
